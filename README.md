@@ -1,4 +1,4 @@
-# HTWGUI
+# HUNT THE WUPUS
  Hunt The Wunpus
 	Overview
 
@@ -92,27 +92,14 @@ GUI-Example Runs
 
 1) The example 1 run shows the player losing by falling into a pit.
 
+file:///C:/Users/Adithya/HTWGUI/HTWGUI/res/GUIExampleRuns/ExampleRun1.png
+
 2) The example 2 run shows the player being eaten by a Wumpus. It also displays the scrollpane on 	the panel.
 
 3) The example 3 run shows the player killing the Wumpus.
 
 4) The example 4 run shows the grid in two player-mode.
 
-	 Design/Model Changes
-	 
-1) The Maze interface now has methods to get the number of rows and columns in the maze. This was 	needed to create the grid in the GUI
-
-2) A new method called getMappedValues() that maps the cells to integers. This makes it easier to 	create the grid in the GUI.
-
-3) The GUI requires the tunnels in the maze as well as the direction each tunnel points to. Hence 	the methods, getListOfTunnels(), getCardinalDirections(), getDirections() have been added to the 	Player model.
-
-4) A new feature interface is added.This interface represents a set of features that the program 	offers. Each feature is exposed as a function to the view. This function is used suitably as a 	callback by the view, to pass control to the controller. The controller implements this 	interface.
-
-5) The feature consist of an executeActionMethod, implemented by the controller, that takes in a 	command from the view along with the user input. The execute method then executes the specific 	action. 
-
-6) The Main method now takes in command line arguments and calls either the text bases interface or 	the GUI based on the command.
-
-7) An additional constructor has been added to the playerModel class. tHe constructor takes in a 	completed Maze and number of arrows as parameters. This enables the program to create multiple 	player objects with the same Maze configuration. (For 2-Player mode) 
 
 	Assumptions
 
