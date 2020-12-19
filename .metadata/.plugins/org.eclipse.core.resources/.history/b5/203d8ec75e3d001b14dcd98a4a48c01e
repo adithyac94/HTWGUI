@@ -1,0 +1,105 @@
+package htwview;
+
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import htwcontroller.Features;
+
+/**
+ * This class represents the view for the user to enter the number of caves and
+ * direction to shoot an arrow. It extends the JFrame class and implements the
+ * ActionListener interface.
+ */
+public class ShootPrompt extends JFrame implements ActionListener {
+
+  private Features ic2;
+  private static final long serialVersionUID = 1L;
+  private String caveNumbers;
+  private String caveDir;
+  private JTextField numberOfcaveDirs;
+  private JTextField caveDirDirection;
+
+  /**
+   * The Constructor creates a dialog box with textfields for the user to enter
+   * the inputs to shoot an arrow.
+   * 
+   * @param iController The controller features
+   */
+  public ShootPrompt(Features iController) {
+
+    this.ic2 = iController;
+    JPanel panel = new JPanel();
+    panel.setLayout(new GridBagLayout());
+    GridBagConstraints c = new GridBagConstraints();
+    c.gridx = 0;
+    c.gridy = 0;
+    panel.add(new JLabel("Number of Caves "), c);
+    c.gridx = 1;
+    c.gridy = 0;
+    numberOfcaveDirs = new JTextField(10);
+    panel.add(numberOfcaveDirs, c);
+    c.gridx = 0;
+    c.gridy = 1;
+    panel.add(new JLabel("Towards Direction? (N,S,E,W) "), c);
+    c.gridx = 1;
+    c.gridy = 1;
+    caveDirDirection = new JTextField(10);
+    panel.add(caveDirDirection, c);
+
+    JButton ok = new JButton("OK");
+    ok.addActionListener(this);
+    c.gridx = 1;
+    c.gridy = 3;
+    panel.add(ok, c);
+    this.add(panel);
+    this.setResizable(false);
+    this.setSize(350, 350);
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.pack();
+    this.setLocationRelativeTo(null);
+    this.setVisible(true);
+    this.setAlwaysOnTop(true);
+
+  }
+
+  /**
+   * This method gets the cave numbers entered by the user.
+   * 
+   * @return Integer
+   */
+  public Integer getcaveNumbers() {
+    return Integer.parseInt(caveNumbers);
+  }
+
+  /**
+   * This method gets the cave direction entered by the user.
+   * 
+   * @return String
+   */
+  public String getcaveDir() {
+    return caveDir;
+  }
+
+  /**
+   * This method calls the callback function in the controller to shoot an arrow from the inputs given by the user.
+   * 
+   * @return String
+   */
+  @Override
+  public void actionPerformed(ActionEvent e) {
+
+    caveNumbers = numberOfcaveDirs.getText();
+    caveDir = caveDirDirection.getText();
+    dispose();
+    ic2.shootArrow(getcaveDir(), getcaveNumbers());
+
+  }
+}

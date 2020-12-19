@@ -1,0 +1,82 @@
+package htwview;
+
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import htwcontroller.IController2;
+
+public class ShootPrompt extends JFrame implements ActionListener{
+  
+  /**
+   * 
+   */
+  IController2 ic2;
+  private static final long serialVersionUID = 1L;
+  private String arrows;
+  private String cave;
+  private JTextField arrowsButton;
+  private JTextField caveButton;
+  
+  public ShootPrompt(IController2 ic2) {
+    
+    this.ic2 = ic2;
+    JPanel panel = new JPanel();
+    panel.setLayout(new GridBagLayout());
+    GridBagConstraints c = new GridBagConstraints();
+    c.gridx = 0;
+    c.gridy = 0;
+    panel.add(new JLabel("Number of Arrows "), c);
+    c.gridx = 1;
+    c.gridy = 0;
+    arrowsButton = new JTextField(10);
+    panel.add(arrowsButton, c);
+    c.gridx = 0;
+    c.gridy = 1;
+    panel.add(new JLabel("Towards Cave? "), c);
+    c.gridx = 1;
+    c.gridy = 1;
+    caveButton = new JTextField(10);
+    panel.add(caveButton, c);
+    
+    JButton ok = new JButton("OK");
+    ok.addActionListener(this);
+    c.gridx = 1;
+    c.gridy = 3;
+    panel.add(ok,c);
+    this.add(panel);
+    this.setResizable(false);
+    this.setSize(150, 150);
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.pack();
+    this.setLocationRelativeTo(null);
+    this.setVisible(true);
+    
+  }
+
+  public int getArrows() {
+    return Integer.parseInt(arrows);
+  }
+  
+  public int getCave() {
+    return Integer.parseInt(cave);
+  }
+
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    Object source = e.getSource();
+
+       arrows = arrowsButton.getText();
+       cave = caveButton.getText();
+       dispose();
+       ic2.shootArrow(getCave(),getArrows());
+
+    }
+}

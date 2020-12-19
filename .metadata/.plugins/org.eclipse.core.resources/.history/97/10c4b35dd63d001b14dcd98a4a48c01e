@@ -1,0 +1,865 @@
+package htwview;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.imageio.ImageIO;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+
+import htwcontroller.Features;
+
+/**
+ * This class represents the grid for the player to navigate. It defines all the
+ * action listeners and then connects each listener to the appropriate callback
+ * function.
+ */
+public class HtwView extends JFrame implements KeyListener {
+  private static final long serialVersionUID = 5883479994622814210L;
+
+  private JLabel[] players = { null, null };
+  private JLabel[] oldLabels = { null, null };
+  private int[] oldValues = { -1, -1 };
+  private JPanel panel;
+  private int turn = 2;
+  private JLabel arrowCount;
+  private JLabel arrowCount2;
+  private JLabel playerTurn;
+  private JLabel alertMessage;
+  private Features hc;
+  private boolean playerMode;
+
+  /**
+   * Constructs an object of the view with the given controller object.
+   *
+   * @param hc The controller object
+   *
+   */
+  public HtwView(Features hc) {
+    super("Hunt The Wumpus");
+    this.hc = hc;
+
+  }
+
+  /**
+   * This method generates the grid and places the player in the starting position
+   * in the GUI with the given maze and player information.
+   *
+   * @param x                  The number of rows
+   * @param y                  The number of columns
+   * @param rooms              The list of rooms
+   * @param bats               The list of bat positions
+   * @param pits               The list of pit positions
+   * @param cardinalDirections The list of possible cardinal directions from a
+   *                           cell in the maze
+   * @param wumpusPosition     The position of the wumpus
+   * @param arrows             The number of arrows
+   * @param playerMode         The player mode
+   *
+   */
+  public void createGrid(int x, int y, List<Integer> rooms, List<Integer> bats, List<Integer> pits,
+      Map<Integer, List> cardinalDirections, int wumpusPosition, int arrows, List<Integer> startPositions, boolean playerMode) {
+
+    panel = new JPanel(new GridLayout(x, y, 0, 0));
+    panel.setBackground(Color.WHITE);
+    JPanel mainPanel = new JPanel();
+    mainPanel.setLayout(new BorderLayout());
+
+    JPanel alertPanel = new JPanel();
+    alertPanel.setPreferredSize(new Dimension(30, 30));
+    alertMessage = new JLabel();
+    alertMessage.setFont(new Font("Serif", Font.BOLD, 20));
+    alertMessage.setForeground(Color.RED);
+    arrowCount = new JLabel("Arrow Count of Player 1 : " + arrows);
+    arrowCount.setFont(new Font("Serif", Font.ITALIC, 20));
+    if (playerMode) {
+      arrowCount2 = new JLabel("Arrow Count of Player 2 : " + arrows);
+      arrowCount2.setFont(new Font("Serif", Font.ITALIC, 20));
+      arrowCount2.setForeground(Color.BLUE);
+    }
+    playerTurn = new JLabel("Player " + 1 + "'s turn to Move/Shoot.");
+    playerTurn.setFont(new Font("Serif", Font.ITALIC, 20));
+    JPanel subPanel = new JPanel();
+    subPanel.setLayout(new BoxLayout(subPanel, BoxLayout.Y_AXIS));
+    JButton restart = new JButton("Restart");
+    restart.setFont(new Font("Serif", Font.BOLD,20));
+    restart.setBackground(Color.WHITE);
+    //restart.setPreferredSize(new Dimension(200,100));
+
+    this.playerMode = playerMode;
+    ImageIcon grassIcon2 = new ImageIcon("res/player.png");
+    Image img2 = grassIcon2.getImage();
+    Image newImg2 = img2.getScaledInstance(10, 10, java.awt.Image.SCALE_SMOOTH);
+    ImageIcon newIcon2 = new ImageIcon(newImg2);
+
+    int size = x * y;
+    for (int i = 0; i < size; ++i) {
+
+      if (rooms.contains(i)) {
+
+        JLabel tile = makeRoomLabelIcon(i, cardinalDirections, bats, pits, wumpusPosition);
+        tile.setName(Integer.toString(i));
+        tile.setVisible(false);
+        panel.add(tile);
+      }
+
+      else {
+
+        JLabel tile = makeTunnelLabelIcon(i, cardinalDirections);
+        tile.setName(Integer.toString(i));
+        tile.setVisible(false);
+        panel.add(tile);
+      }
+    }
+
+    players[0] = new JLabel();
+    players[0] = makeLabelIcon(newIcon2);
+    updatePlayerStartingPosition(0, startPositions.get(0));
+
+    if (playerMode) {
+      players[1] = new JLabel();
+      players[1] = makeLabelIcon(newIcon2);
+
+      updatePlayerStartingPosition(1, startPositions.get(1));
+    }
+    panel.addMouseListener(createMouseListener());
+
+    subPanel.add(Box.createVerticalGlue());
+    subPanel.add(playerTurn, BorderLayout.CENTER);
+    subPanel.add(Box.createVerticalGlue());
+    subPanel.add(arrowCount);
+    if (playerMode) {
+      subPanel.add(arrowCount2);
+    }
+    subPanel.add(Box.createVerticalGlue());
+    subPanel.add(restart, BorderLayout.CENTER);
+    subPanel.add(Box.createVerticalGlue());
+    restart.addActionListener(restart());
+    this.addKeyListener(this);
+    this.setResizable(false);
+    JScrollPane scrPane = new JScrollPane(panel);
+//    /scrPane.setPreferredSize(new Dimension(560,60));
+    alertPanel.add(alertMessage);
+    mainPanel.add(alertPanel, BorderLayout.NORTH);
+    mainPanel.add(scrPane, BorderLayout.WEST);
+    mainPanel.add(subPanel, BorderLayout.EAST);
+    this.add(mainPanel);
+    //this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.pack();
+    this.setLocationRelativeTo(null);
+    this.setVisible(true);
+
+  }
+
+  /**
+   * This method creates an image label.
+   *
+   * @param icon ImageIcon
+   * @return JLabel jlabel
+   */
+  private JLabel makeLabelIcon(ImageIcon icon) {
+    JLabel label = new JLabel(icon);
+    //label.setBorder(new CompoundBorder(new LineBorder(Color.LIGHT_GRAY), new EmptyBorder(4, 4, 4, 4)));
+    return label;
+  }
+
+  /**
+   * This method creates an image label for the tunnels in the grid.
+   *
+   * @param pos                Cell position
+   * @param cardinalDirections The list of all possible directions from a cell
+   *
+   * @return JLabel jlabel
+   */
+  private JLabel makeTunnelLabelIcon(int pos, Map<Integer, List> cardinalDirections) {
+
+    List<String> dirs = cardinalDirections.get(pos);
+    JLabel tile = null;
+    if (dirs.contains("North") && dirs.contains("East")) {
+
+      ImageIcon grassIcon = new ImageIcon("res/images/Tunnels/hallway-ne.png");
+      Image img = grassIcon.getImage();
+      Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+      ImageIcon newIcon = new ImageIcon(newImg);
+
+      tile = makeLabelIcon(newIcon);
+
+    }
+
+    if (dirs.contains("North") && dirs.contains("West")) {
+
+      ImageIcon grassIcon = new ImageIcon("res/images/Tunnels/hallway-wn.png");
+      Image img = grassIcon.getImage();
+      Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+      ImageIcon newIcon = new ImageIcon(newImg);
+
+      tile = makeLabelIcon(newIcon);
+
+    }
+
+    if (dirs.contains("South") && dirs.contains("East")) {
+
+      ImageIcon grassIcon = new ImageIcon("res/images/Tunnels/hallway.png");
+      Image img = grassIcon.getImage();
+      Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+      ImageIcon newIcon = new ImageIcon(newImg);
+
+      tile = makeLabelIcon(newIcon);
+
+    }
+
+    if (dirs.contains("South") && dirs.contains("West")) {
+
+      ImageIcon grassIcon = new ImageIcon("res/images/Tunnels/hallway-ws.png");
+      Image img = grassIcon.getImage();
+      Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+      ImageIcon newIcon = new ImageIcon(newImg);
+
+      tile = makeLabelIcon(newIcon);
+
+    }
+
+    if (dirs.contains("South") && dirs.contains("North")) {
+
+      ImageIcon grassIcon = new ImageIcon("res/images/Tunnels/hallway-vertical.png");
+      Image img = grassIcon.getImage();
+      Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+      ImageIcon newIcon = new ImageIcon(newImg);
+
+      tile = makeLabelIcon(newIcon);
+
+    }
+
+    if (dirs.contains("East") && dirs.contains("West")) {
+
+      ImageIcon grassIcon = new ImageIcon("res/images/Tunnels/hallway-straight.png");
+      Image img = grassIcon.getImage();
+      Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+      ImageIcon newIcon = new ImageIcon(newImg);
+
+      tile = makeLabelIcon(newIcon);
+
+    }
+    return tile;
+  }
+
+  /**
+   * This method creates an image label for the rooms in the grid.
+   *
+   * @param pos                Cell position
+   * @param cardinalDirections The list of all possible directions from a cell
+   * @param bats               The list of bat positions
+   * @param pits               The list of pit positions
+   * 
+   * @return JLabel jlabel
+   *
+   */
+  private JLabel makeRoomLabelIcon(int pos, Map<Integer, List> cardinalDirections,
+      List<Integer> bats, List<Integer> pits, int wumpusPosition) {
+
+    List<String> dirs = cardinalDirections.get(pos);// pl.getDirections(pos);
+    JLabel tile = null;
+
+    if (dirs.size() == 1) {
+
+      if (dirs.contains("North")) {
+
+        ImageIcon grassIcon = new ImageIcon("res/images/RoomBases/roombase-north.png");
+        Image img = grassIcon.getImage();
+        Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+        ImageIcon newIcon = new ImageIcon(newImg);
+
+        tile = makeLabelIcon(newIcon);
+
+      }
+
+      if (dirs.contains("South")) {
+
+        ImageIcon grassIcon = new ImageIcon("res/images/RoomBases/roombase-south.png");
+        Image img = grassIcon.getImage();
+        Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+        ImageIcon newIcon = new ImageIcon(newImg);
+        tile = makeLabelIcon(newIcon);
+      }
+      if (dirs.contains("East")) {
+
+        ImageIcon grassIcon = new ImageIcon("res/images/RoomBases/roombase-east.png");
+        Image img = grassIcon.getImage();
+        Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+        ImageIcon newIcon = new ImageIcon(newImg);
+        tile = makeLabelIcon(newIcon);
+      }
+      if (dirs.contains("West")) {
+
+        ImageIcon grassIcon = new ImageIcon("res/images/RoomBases/roombase-west.png");
+        Image img = grassIcon.getImage();
+        Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+        ImageIcon newIcon = new ImageIcon(newImg);
+        tile = makeLabelIcon(newIcon);
+      }
+
+    }
+
+    else if (dirs.size() == 3) {
+
+      if (!dirs.contains("North")) {
+
+        ImageIcon grassIcon = new ImageIcon("res/images/RoomBases/roombase-3.png");
+        Image img = grassIcon.getImage();
+        Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+        ImageIcon newIcon = new ImageIcon(newImg);
+
+        tile = makeLabelIcon(newIcon);
+
+      }
+
+      if (!dirs.contains("South")) {
+
+        ImageIcon grassIcon = new ImageIcon("res/images/RoomBases/roombase3-south.png");
+        Image img = grassIcon.getImage();
+        Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+        ImageIcon newIcon = new ImageIcon(newImg);
+        tile = makeLabelIcon(newIcon);
+      }
+      if (!dirs.contains("East")) {
+
+        ImageIcon grassIcon = new ImageIcon("res/images/RoomBases/roombase3-east.png");
+        Image img = grassIcon.getImage();
+        Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+        ImageIcon newIcon = new ImageIcon(newImg);
+        tile = makeLabelIcon(newIcon);
+      }
+      if (!dirs.contains("West")) {
+
+        ImageIcon grassIcon = new ImageIcon("res/images/RoomBases/roombase3-west.png");
+        Image img = grassIcon.getImage();
+        Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+        ImageIcon newIcon = new ImageIcon(newImg);
+        tile = makeLabelIcon(newIcon);
+      }
+
+    }
+
+    else if (dirs.size() == 4) {
+
+      ImageIcon grassIcon = new ImageIcon("res/images/RoomBases/roombase-4.png");
+      Image img = grassIcon.getImage();
+      Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+      ImageIcon newIcon = new ImageIcon(newImg);
+      tile = makeLabelIcon(newIcon);
+    }
+
+    else {
+      ImageIcon grassIcon = new ImageIcon("res/images/RoomBases/roombase-3.png");
+      Image img = grassIcon.getImage();
+      Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+      ImageIcon newIcon = new ImageIcon(newImg);
+      tile = makeLabelIcon(newIcon);
+    }
+    try {
+      if (pos == wumpusPosition) {
+        Image fgImage;
+
+        fgImage = ImageIO.read(new File("res/images/wumpus.png"));
+
+        BufferedImage newImage = appendNewImage(fgImage, tile);
+        tile.setIcon(new ImageIcon(newImage));
+      }
+
+      if (bats.contains(pos)) {
+        Image fgImage;
+
+        fgImage = ImageIO.read(new File("res/images/superBat.png"));
+
+        BufferedImage newImage = appendNewImage(fgImage, tile);
+        tile.setIcon(new ImageIcon(newImage));
+      }
+      if (pits.contains(pos)) {
+        Image fgImage;
+
+        fgImage = ImageIO.read(new File("res/images/slime-pit.png"));
+
+        BufferedImage newImage = appendNewImage(fgImage, tile);
+        tile.setIcon(new ImageIcon(newImage));
+      }
+
+    } catch (IOException e) {
+
+      e.printStackTrace();
+    }
+    return tile;
+  }
+
+  /**
+   * This method updates the frame.
+   *
+   */
+  private void updateFrame() {
+    this.validate();
+
+  }
+
+  @Override
+  public void keyPressed(KeyEvent e) {
+    String input = "Keyboard";
+    List<String> commands = new ArrayList<String>();
+    if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+      commands.add("West");
+      hc.executeActionCommand(input, commands);
+      // hc.movePlayer("West");
+    }
+    if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+      commands.add("East");
+      hc.executeActionCommand(input, commands);
+      // hc.movePlayer("East");
+    }
+    if (e.getKeyCode() == KeyEvent.VK_UP) {
+      commands.add("North");
+      hc.executeActionCommand(input, commands);
+      // hc.movePlayer("North");
+    }
+
+    if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+      commands.add("South");
+      hc.executeActionCommand(input, commands);
+
+      // hc.movePlayer("South");
+    }
+
+    if (e.getKeyCode() == KeyEvent.VK_S) {
+      new ShootPrompt(hc);
+    }
+
+    if (playerMode) {
+      if (turn == 1) {
+        turn = 2;
+      } else {
+        turn = 1;
+      }
+
+      if (turn == 2) {
+        if (oldValues[0] == oldValues[1]) {
+          JLabel copy2 = oldLabels[0];
+          oldLabels[0] = players[1];
+          oldLabels[1] = copy2;
+        }
+      } else {
+        if (oldValues[0] == oldValues[1]) {
+          JLabel copy2 = oldLabels[1];
+          oldLabels[1] = players[0];
+          oldLabels[0] = copy2;
+        }
+      }
+
+    }
+
+    updateFrame();
+
+  }
+
+  /**
+   * This method restarts the grid with the same maze specifications.
+   *
+   * @return ActionListener the action listener
+   */
+  private ActionListener restart() {
+    resetFocus();
+    return new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        hc.generateGrid();
+        dispose();
+        getContentPane().removeAll();
+        repaint();
+      }
+    };
+
+  }
+
+  /**
+   * This method appends two images on to the cell.
+   *
+   * @param fgImage   foreground Image
+   * @param oldLabels The JLabel component
+   *
+   */
+  private BufferedImage appendNewImage(Image fgImage, JLabel oldLabels) {
+
+    BufferedImage finalImage = null;
+
+    ImageIcon icon = (ImageIcon) oldLabels.getIcon();
+    Image bgImage = icon.getImage();
+
+    int w = bgImage.getWidth(null);
+    int h = bgImage.getHeight(null);
+
+    finalImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+    Graphics2D g = finalImage.createGraphics();
+    g.drawImage(bgImage, 0, 0, null);
+    g.drawImage(fgImage, 25, 25, null);
+    g.dispose();
+
+    return finalImage;
+
+  }
+
+  public void resetFocus() {
+    this.setFocusable(true);
+    this.requestFocus();
+  }
+
+  /**
+   * This method reveals all the tunnels traversed by the player on the grid.
+   *
+   * @param listOfTunnels List Of Tunnels
+   *
+   */
+  public void makeVisible(List<Integer> listOfTunnels) {
+
+    for (int t : listOfTunnels) {
+      JLabel label = (JLabel) panel.getComponent(t);
+      label.setVisible(true);
+      panel.remove(t);
+      panel.add(label, t);
+
+    }
+
+  }
+
+  /**
+   * This method updates the player position on the grid.
+   *
+   * @param pos           Current Position of the player.
+   * @param wumpusWarning Wumpus Warning.
+   * @param pitWarning    Pit Warning.
+   *
+   */
+  public void updatePlayerPosition(int pos, boolean wumpusWarning, boolean pitWarning) {
+    int k = 0;
+    try {
+      Image fgImage = ImageIO.read(new File("res/images/player.png"));
+
+      String copy = null;
+      if (playerMode) {
+        int oppK = -1;
+        if (turn == 2) {
+          k = 0;
+          oppK = 1;
+        } else {
+          k = 1;
+          oppK = 0;
+          fgImage = ImageIO.read(new File("res/images/player-2.png"));
+        }
+
+        if (oldLabels[turn - 1] != null) {
+          copy = oldLabels[turn - 1].getName();
+
+        }
+
+      }
+      JLabel player = players[k];
+
+      if (oldLabels[k] != null) {
+        panel.remove(oldValues[k]);
+        oldLabels[k].setVisible(true);
+        oldLabels[k].setName(Integer.toString(oldValues[k]));
+        panel.add(oldLabels[k], oldValues[k]);
+      }
+
+      oldLabels[k] = (JLabel) panel.getComponent(pos);
+      oldValues[k] = pos;
+      panel.remove(pos);
+      if (wumpusWarning) {
+        Image fgImage1 = ImageIO.read(new File("res/images/wumpus-nearby.png"));
+        BufferedImage newImage2 = appendNewImage(fgImage1, oldLabels[k]);
+        oldLabels[k].setIcon(new ImageIcon(newImage2));
+      }
+      if (pitWarning) {
+
+        Image fgImage2 = ImageIO.read(new File("res/images/slime-pit-nearby.png"));
+        BufferedImage newImage2 = appendNewImage(fgImage2, oldLabels[k]);
+        oldLabels[k].setIcon(new ImageIcon(newImage2));
+
+      }
+
+      BufferedImage newImage = appendNewImage(fgImage, oldLabels[k]);
+      player.setIcon(new ImageIcon(newImage));
+      player.setName(Integer.toString(pos));
+      player.setVisible(true);
+      panel.add(player, pos);
+      updateFrame();
+
+      if (playerMode) {
+        if (oldLabels[turn - 1] != null && !copy.equals(oldLabels[turn - 1].getName())) {
+          oldLabels[turn - 1] = (JLabel) panel.getComponent(Integer.parseInt(copy));
+        }
+
+      }
+
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * This method places the player at the starting position.
+   *
+   * @param i        player Number.
+   * @param startPos Starting position.
+   *
+   */
+  public void updatePlayerStartingPosition(int i, int startPos) {
+
+    try {
+      oldLabels[i] = (JLabel) panel.getComponent(startPos);
+      oldValues[i] = startPos;
+      panel.remove(startPos);
+      Image fgImage = null;
+      if (i == 0) {
+        fgImage = ImageIO.read(new File("res/images/player.png"));
+      } else {
+        fgImage = ImageIO.read(new File("res/images/player-2.png"));
+      }
+      BufferedImage newImage = appendNewImage(fgImage, oldLabels[i]);
+      players[i].setIcon(new ImageIcon(newImage));
+      players[i].setName(Integer.toString(startPos));
+      players[i].setVisible(true);
+      panel.add(players[i], startPos);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+  }
+
+  @Override
+  public void keyReleased(KeyEvent e) {
+    if (oldValues[0] == oldValues[1]) {
+      int t = turn == 2 ? 1 : 2;
+      alertMessage
+          .setText("Player " + t + " has been knocked unconscious.Wake player " + t + " by moving");
+    }
+  }
+
+  /**
+   * Empty Method.
+   *
+   * @param e KeyEvent
+   */
+  @Override
+  public void keyTyped(KeyEvent e) {
+
+    alertMessage.setText("");
+  }
+
+  /**
+   * This method displays a popup message if the player falls into the pit.
+   *
+   * @param playerNumber the player number
+   */
+  public void showFallenMessage(int playerNumber) {
+    ImageIcon grassIcon2 = new ImageIcon("res/images/slime-pit.png");
+
+    String message = "\nOh no..Down the rabbit hole you go player " + playerNumber
+        + "!!! \nBetter Luck Next Time";
+
+    JLabel victory = new JLabel(message, grassIcon2, JLabel.LEFT);
+    JOptionPane.showMessageDialog(null, victory, "Player " + playerNumber + " Loses!!",
+        JOptionPane.PLAIN_MESSAGE);
+    this.dispose();
+
+  }
+
+  /**
+   * This method creates a mouse listener object that moves a player based on
+   * mouse clicks.
+   *
+   */
+  private MouseAdapter createMouseListener() {
+    return new MouseAdapter() {
+      @Override
+      public void mousePressed(MouseEvent e) {
+        JLabel l = new JLabel();
+        JPanel panel = (JPanel) e.getSource();
+        JLabel label = (JLabel) panel.getComponentAt(e.getX(), e.getY());
+        if (turn == 1) {
+          l = oldLabels[1];
+        } else {
+          l = oldLabels[0];
+        }
+        if (l != null) {
+          List<String> commands = new ArrayList<String>();
+          commands.add(l.getName());
+          commands.add(label.getName());
+          hc.executeActionCommand("Mouse", commands);
+
+        }
+        if (playerMode) {
+          if (turn == 1) {
+            turn = 2;
+          } else {
+            turn = 1;
+          }
+
+          if (turn == 2) {
+            if (oldValues[0] == oldValues[1]) {
+              JLabel copy2 = oldLabels[0];
+              oldLabels[0] = players[1];
+              oldLabels[1] = copy2;
+            }
+          } else {
+            if (oldValues[0] == oldValues[1]) {
+              JLabel copy2 = oldLabels[1];
+              oldLabels[1] = players[0];
+              oldLabels[0] = copy2;
+            }
+          }
+
+        }
+
+      }
+    };
+  }
+
+  /**
+   * This method displays a popup message if the player is eaten by the wumpus.
+   *
+   * @param playerNumber The player Number
+   */
+  public void showEatenMessage(int playerNumber) {
+    ImageIcon grassIcon2 = new ImageIcon("res/images/wumpus.png");
+    String message = String.format("\nChomp, chomp, chomp, thanks for feeding the Wumpus Player "
+        + playerNumber + "! :P \nBetter Luck Next Time");
+    JLabel victory = new JLabel(message, grassIcon2, JLabel.LEFT);
+    JOptionPane.showMessageDialog(null, victory, "Yummy!!", JOptionPane.PLAIN_MESSAGE);
+    this.dispose();
+
+  }
+
+  /**
+   * This method displays a popup victory message if the player slays the wumpus.
+   *
+   * @param wumpusPosition the position of the Wumpus
+   * @param playerNumber   the player number
+   */
+  public void victoryMessage(int wumpusPosition, int playerNumber) {
+    ImageIcon grassIcon2 = new ImageIcon("res/images/target.png");
+    JLabel wumpus = (JLabel) panel.getComponent(wumpusPosition);
+    wumpus.setVisible(true);
+    Image fgImage;
+    try {
+      fgImage = ImageIO.read(new File("res/images/target.png"));
+      wumpus.setIcon(new ImageIcon(appendNewImage(fgImage, wumpus)));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    String message = String.format("Hee hee hee, you got the wumpus Player " + playerNumber
+        + "! ^|^ \nNext time you won't be so lucky");
+    JLabel victory = new JLabel(message, grassIcon2, JLabel.LEFT);
+    JOptionPane.showMessageDialog(null, victory, "Yaay!!! Player " + playerNumber + " Wins",
+        JOptionPane.PLAIN_MESSAGE);
+
+    this.dispose();
+
+  }
+
+  /**
+   * This method displays a popup message if the player runs out of arrows.
+   * 
+   * @param playerNumber
+   *
+   */
+  public void outOfArrowsMessage(int playerNumber) {
+    ImageIcon grassIcon2 = new ImageIcon("res/images/target.png");
+    String message = String.format(
+        "Oh no..You are all out of arrows Player " + playerNumber + ". \nBetter Luck Next Time\n");
+    JLabel victory = new JLabel(message, grassIcon2, JLabel.LEFT);
+    JOptionPane.showMessageDialog(null, victory, "Oops!!! Player " + playerNumber + " Loses",
+        JOptionPane.PLAIN_MESSAGE);
+    this.dispose();
+
+  }
+
+  /**
+   * This method notifies the player of the turn.
+   *
+   * @param playerNum playerNumber
+   */
+  public void setPlayerTurn(int playerNum) {
+    playerTurn.setText("Player " + playerNum + "'s turn to Move/Shoot.");
+    if (playerNum == 2) {
+      playerTurn.setForeground(Color.BLUE);
+    } else {
+      playerTurn.setForeground(Color.BLACK);
+    }
+  }
+
+  /**
+   * This method notifies the player of the number of arrows remaining.
+   *
+   * @param arrowNumber  the number of arrows
+   * @param playerNumber the player number
+   */
+  public void setArrowCount(int arrowNumber, int playerNumber) {
+
+    if (playerNumber == 2) {
+      arrowCount2.setText("Arrow Count of Player 2 : " + arrowNumber);
+    } else {
+      arrowCount.setText("Arrow Count of Player " + playerNumber + " : " + arrowNumber);
+    }
+
+  }
+
+  /**
+   * This method notifies if the player has been caught by the bat.
+   *
+   * @param batWarning batWarning
+   */
+  public void updatePlayerBatMessage(int batWarning) {
+    if (batWarning == 1) {
+      int pTurn = turn - 1;
+      alertMessage.setText("Player " + pTurn + " has been caught by a SuperBat");
+    }
+    if (batWarning == 0) {
+      int pTurn = turn - 1;
+      alertMessage.setText("Player " + pTurn + " has successfully ducked the SuperBat");
+    }
+    if (batWarning == -1) {
+      alertMessage.setText("");
+    }
+
+  }
+
+  public void setInvalidDirectionMessage(int turn) {
+    alertMessage.setText("Invalid Direction!! You lose your turn Player "+ turn);
+    
+  }
+
+}

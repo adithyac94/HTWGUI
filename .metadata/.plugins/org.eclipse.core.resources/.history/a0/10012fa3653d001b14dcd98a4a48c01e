@@ -1,0 +1,84 @@
+package htwmock;
+
+import java.util.List;
+import java.util.Map;
+
+
+/**
+ * This class represents a mock class to test the controller in isolation. It is
+ * created to specifically check the output when a player has fallen into a
+ * pit.It extends the MockAbstractPlayer.
+ * 
+ */
+public class MockFallenPlayer extends MockAbstractPlayer {
+
+  /**
+   * Constructs a MockFallenPlayer object with the given log, uniqueCode and
+   * uniqueCheck.
+   * 
+   * @param log         StringBuilder
+   * @param uniqueCode  Unique Integer
+   * @param uniqueCheck Unique Boolean
+   */
+  public MockFallenPlayer(StringBuilder log, int uniqueCode, boolean uniqueCheck) {
+    super(log, uniqueCode, uniqueCheck);
+
+  }
+
+  @Override
+  public boolean hasFallen() {
+    return uniqueCheck;
+  }
+
+  @Override
+  public int getRows() {
+    
+    return 0;
+  }
+
+  @Override
+  public int getColumns() {
+    
+    return 0;
+  }
+
+  @Override
+  public List<String> getCardinalDirections() {
+    
+    return null;
+  }
+
+  @Override
+  public void moveDirection(String dir) {
+    
+    
+  }
+
+  @Override
+  public List<String> getDirections(int pos) {
+    
+    return null;
+  }
+
+  @Override
+  public List<Integer> getListOfTunnels(int prevPosition, String direction) {
+    
+    return null;
+  }
+
+  @Override
+  public List<Integer> getAdjacentRooms(int pos) {
+    
+    return null;
+  }
+
+  @Override
+  public Map<Integer, List> getCardinalNumber() {
+    
+    return null;
+  }
+
+
+
+
+}

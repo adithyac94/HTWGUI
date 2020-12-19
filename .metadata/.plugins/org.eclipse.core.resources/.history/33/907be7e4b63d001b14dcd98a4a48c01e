@@ -1,0 +1,510 @@
+package htwcontroller;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Scanner;
+
+import htwmodel.Player;
+import htwmodel.PlayerModel;
+import htwview.HtwView;
+
+/**
+ * This is the controller class which takes keyboard input, and outputs the
+ * state of the game to the screen. It takes inputs from the user to navigate
+ * the player through the maze and shoot an arrow in the given direction.
+ * 
+ */
+public class HtwController implements Features {
+
+  private final Readable in;
+  private final Appendable out;
+
+  private Player player;
+  private Player player2;
+  private HtwView view;
+  private int turn;
+  private boolean playerMode;
+
+  /**
+   * Public constructor to construct the controller object.
+   * 
+   * @param in  Readable input
+   * @param out Appendable output
+   */
+  public HtwController(Readable in, Appendable out) {
+
+    this.out = out;
+    this.in = in;
+
+  }
+
+  /**
+   * This method takes inputs from the user to navigate the player through the
+   * maze and shoot an arrow in the given direction.
+   * 
+   * @param player Player Object
+   * 
+   * @throws IOException if an I/O error occurs
+   */
+  public void start(Player player) throws IOException {
+
+    Scanner myObj = new Scanner(this.in);
+
+    System.out.println(
+        "Select a starting position from the following list of rooms\n " + player.getRooms());
+    String startPosition = myObj.next();
+
+    player.setStartPosition(startPosition);
+
+    if (!player.getRooms().contains(startPosition)) {
+      myObj.close();
+      throw new IllegalArgumentException("Invalid Starting Point!!!");
+    }
+
+    boolean t = checkIfPlayerisTerminated(player);
+
+    System.out.println();
+
+    if (t) {
+      checkIfCaughtByBat(startPosition, player);
+      checkClosness(player);
+      this.out.append(String.format("You are in Cave " + player.getCurrentPosition() + "\n"));
+      this.out.append(String.format("The Cave connects to " + player.getTunnelLeads() + "\n"));
+
+    }
+
+    while (t) {
+
+      System.out.println("Shoot or Move (S-M)?");
+      String choice = myObj.next();
+
+      switch (choice) {
+
+        case "M":
+          int i = move(player, myObj);
+          if (i == -1) {
+            t = false;
+            myObj.close();
+          }
+          System.out.println();
+          break;
+        case "S":
+          int k = shoot(myObj, player);
+          if (k == 1) {
+            this.out.append(String
+                .format("Hee hee hee, you got the wumpus! ^|^ \nNext time you won't be so lucky"));
+            t = false;
+            myObj.close();
+          } else if (k == -1) {
+            this.out.append(String
+                .format("Oh no..You are all out of arrows \nBetter Luck Next Time\n"));
+            t = false;
+            myObj.close();
+          }
+          System.out.println();
+          break;
+        default:
+          t = false;
+          myObj.close();
+          break;
+
+      }
+    }
+
+  }
+
+  /**
+   * This method takes inputs from the user to move the player through the maze.
+   * It also checks if the player is eaten by the wumpus, picked up by a bat or
+   * has fallen into a pit.
+   * 
+   * @param player Player Object
+   * @param myObj  Scanner Object
+   * 
+   * @return Integer
+   * 
+   * @throws IOException if an I/O error occurs
+   */
+  private int move(Player player, Scanner myObj) throws IOException {
+
+    System.out.println("Where to?");
+    String nextPos = myObj.next();
+
+    if (checkIfCaughtByBat(nextPos, player)) {
+      player.move(nextPos);
+    }
+
+    boolean checkIfPlayerLost = checkIfPlayerisTerminated(player);
+
+    if (!checkIfPlayerLost) {
+      return -1;
+    }
+
+    checkClosness(player);
+
+    this.out.append(String.format("You are in Cave " + player.getCurrentPosition() + "\n"));
+
+    this.out.append(String.format("The Cave connects to " + player.getTunnelLeads() + "\n"));
+    return 1;
+
+  }
+
+  /**
+   * This method takes inputs from the user to shoot an arrow in the given
+   * direction.
+   * 
+   * @param myObj  Scanner Object
+   * @param player Player Object
+   * 
+   * @return integer
+   * 
+   * @throws IOException if an I/O error occurs
+   */
+  private int shoot(Scanner myObj, Player player) {
+
+    System.out.println("No. of caves (1-5)?");
+    int caves = myObj.nextInt();
+
+    System.out.println("Toward cave?");
+    String pos = myObj.next();
+
+    return player.shoot(pos, caves);
+
+  }
+
+  /**
+   * This method checks is a player has fallen into a pit or is eaten by the
+   * Wumpus.
+   * 
+   * @param player Player Object
+   * @return boolean
+   * @throws IOException if an I/O error occurs
+   */
+  private boolean checkIfPlayerisTerminated(Player player) throws IOException {
+
+    if (player.hasFallen()) {
+      this.out
+          .append(String.format("\nOh no..Down the rabbit hole you go!!! \nBetter Luck Next Time"));
+      return false;
+    }
+
+    if (player.isEaten()) {
+      this.out.append(String.format(
+          "\nChomp, chomp, chomp, thanks for feeding the Wumpus! :P \nBetter Luck Next Time"));
+      return false;
+    }
+
+    return true;
+
+  }
+
+  /**
+   * This method checks if a pit or the Wumpus is nearby.
+   * 
+   * @param player Player Object
+   * @throws IOException if an I/O error occurs
+   */
+  private void checkClosness(Player player) throws IOException {
+
+    if (player.isPitClose()) {
+      this.out.append(String.format("You feel a cold wind blowing\n"));
+
+    }
+    if (player.isWumpusClose()) {
+      this.out.append(String.format("You smell something terrible nearby :-O \n"));
+    }
+
+  }
+
+  /**
+   * This method checks is a player is caught by the bat or has ducked the bat.
+   * 
+   * @param pos    Position of the player
+   * @param player Player Object
+   * 
+   * @return boolean
+   * 
+   * @throws IOException if an I/O error occurs
+   */
+  private boolean checkIfCaughtByBat(String pos, Player player) throws IOException {
+
+    int isCaughtByBat = player.isCaughtByBat(pos);
+
+    if (isCaughtByBat == 1) {
+      this.out.append(String.format("\nSnatch -- you are grabbed by superbats ^^ ^^ and ...\n"));
+      this.out
+          .append(String.format("You are dropped in Cave " + player.getCurrentPosition() + "\n"));
+      return false;
+    }
+
+    else if (isCaughtByBat == 0) {
+
+      this.out.append(
+          String.format("\nWhoa -- you successfully duck superbats that try to grab you\n"));
+      return true;
+    }
+
+    return true;
+
+  }
+
+  /**
+   * This method takes Maze inputs from the user to prepare the GUI for the game.
+   * 
+   * @param playerMode The Player Mode
+   * @param mazeType   The Maze Type
+   * @param x          The number of rows
+   * @param y          The number of columns
+   * @param walls      The number of remaining walls
+   * @param bats       The number of bats
+   * @param pits       The number of pits
+   * @param arrows     The number of arrows
+   * 
+   */
+  public void startGUI(boolean playerMode, String mazeType, int x, int y, int walls, int bats,
+      int pits, int arrows) {
+
+    if (mazeType == null) {
+      mazeType = "U";
+    }
+
+    try {
+      this.player = new PlayerModel(mazeType, x, y, walls, bats, pits, arrows);
+    } catch (IllegalArgumentException e) {
+
+      if (e.getMessage().equals("The number of bats are greater than the number of rooms")) {
+        bats = 0;
+      }
+      if (e.getMessage().equals("The number of pits are greater than the number of rooms")) {
+        pits = 0;
+      }
+      if (e.getMessage().equals("The size of the maze cannot be zero")) {
+        x = 9;
+        y = 9;
+        bats = 3;
+        pits = 3;
+        arrows = 2;
+      }
+      this.player = new PlayerModel(mazeType, x, y, walls, bats, pits, arrows);
+
+    }
+    this.playerMode = playerMode;
+    generateGrid();
+  }
+
+  @Override
+  public void generateGrid() {
+    this.turn = 1;
+    this.view = new HtwView(this);
+    player.setStartPosition(player.getRooms().get(0));
+    if (playerMode) {
+      this.player2 = new PlayerModel(player.getMaze(), player.getArrowNumber());
+      player2.setStartPosition(player2.getRooms().get(player2.getRooms().size() - 1));
+    }
+    view.createGrid(player.getRows(), player.getColumns(), player.getRoomNumbers(),
+        player.getBatsPosition(), player.getPitsPosition(), player.getCardinalNumber(),
+        player.getWumpusPosition(), player.getArrowNumber(), playerMode);
+
+  }
+
+  @Override
+  public void ExecuteMovement(String actionInput, List<String> commands) {
+
+    switch (actionInput) {
+
+    case "Keyboard":
+      movePlayer(commands.get(0));
+      break;
+
+    case "Mouse":
+      getAdjacentRooms(Integer.parseInt(commands.get(0)), Integer.parseInt(commands.get(1)));
+      break;
+
+    case "Shoot":
+      shootArrow(commands.get(0),
+          Integer.parseInt(commands.get(1).isEmpty() ? "0" : commands.get(1)));
+      break;
+
+    }
+
+  }
+
+  /**
+   * This method moves the player in the direction specified by the user. It also
+   * checks if the player is eaten by the wumpus, picked up by a bat or has fallen
+   * into a pit.
+   * 
+   * @param direction The Direction
+   * 
+   */
+  public void movePlayer(String direction) {
+
+    Player moveModel = player;
+
+    if (playerMode) {
+
+      if (turn == 1) {
+        moveModel = player;
+        turn = 2;
+      } else {
+        moveModel = player2;
+        turn = 1;
+      }
+    }
+    int prev = moveModel.getCurrentPosition();
+    List<String> directions = moveModel.getCardinalDirections();
+    if (directions.contains(direction)) {
+      moveModel.moveDirection(direction);
+
+      boolean wumpusWarning = false;
+      boolean pitWarning = false;
+      if (moveModel.isWumpusClose()) {
+
+        wumpusWarning = true;
+
+      }
+
+      if (moveModel.isPitClose()) {
+
+        pitWarning = true;
+
+      }
+      view.updatePlayerPosition(moveModel.getCurrentPosition(), wumpusWarning, pitWarning);
+      view.makeVisible(moveModel.getListOfTunnels(prev, direction));
+      view.resetFocus();
+    }
+
+    int caughtByBat = moveModel.isCaughtByBat(moveModel.getCurPosition());
+
+    if (caughtByBat == 1) {
+      boolean wumpusWarning = false;
+      boolean pitWarning = false;
+      if (moveModel.isWumpusClose()) {
+
+        wumpusWarning = true;
+
+      }
+
+      if (moveModel.isPitClose()) {
+
+        pitWarning = true;
+
+      }
+      view.updatePlayerPosition(moveModel.getCurrentPosition(), wumpusWarning, pitWarning);
+
+      view.resetFocus();
+    }
+    view.updatePlayerBatMessage(caughtByBat);
+    if (moveModel.isEaten()) {
+      view.showEatenMessage(turn == 1 && playerMode ? 2 : 1);
+    }
+
+    if (moveModel.hasFallen()) {
+      view.showFallenMessage(turn == 1 && playerMode ? 2 : 1);
+    }
+    if (playerMode) {
+      view.setPlayerTurn(turn);
+    }
+  }
+
+  /**
+   * This method moves the player in the direction specified by the user. It also
+   * checks if the player is eaten by the wumpus, picked up by a bat or has fallen
+   * into a pit.
+   * 
+   * @param pos    Position of the player
+   * @param newPos Position the player wants to move to
+   * 
+   */
+  public void getAdjacentRooms(int pos, int newPos) {
+
+    Player moveModel = player;
+
+    if (playerMode) {
+
+      if (turn == 1) {
+        moveModel = player;
+      } else {
+        moveModel = player2;
+      }
+    }
+
+    List<Integer> rooms = moveModel.getAdjacentRooms(pos);
+
+    if (rooms.contains(newPos)) {
+
+      int index = rooms.indexOf(newPos);
+      List<String> directions = moveModel.getCardinalDirections();
+      String direction = directions.get(index);
+
+      movePlayer(direction);
+    } else {
+      if (playerMode) {
+
+        if (turn == 1) {
+          turn = 2;
+        } else {
+          turn = 1;
+        }
+      }
+    }
+
+  }
+
+  /**
+   * This method enables the player to shoot an arrow given the direction and the
+   * number of caves.
+   * 
+   * @param caveDirection The direction
+   * @param caveNum       The number of caves
+   * 
+   */
+  public void shootArrow(String caveDirection, int caveNum) {
+
+    Player moveModel = player;
+
+    if (playerMode) {
+
+      if (turn == 1) {
+        moveModel = player;
+      } else {
+        moveModel = player2;
+      }
+    }
+
+    if (!caveDirection.isEmpty() || caveNum != 0) {
+      int target = moveModel.shoot(moveModel.getCave(caveDirection), caveNum);
+      if (target == 1) {
+        view.victoryMessage(moveModel.getWumpusPosition(), turn);
+      } else if (target == -1) {
+        view.outOfArrowsMessage(turn);
+      }
+
+      view.setArrowCount(moveModel.getArrowNumber(), turn);
+    }
+    if (playerMode) {
+
+      if (turn == 1) {
+        turn = 2;
+      } else {
+        turn = 1;
+      }
+    }
+
+  }
+
+  public void quit() {
+    System.exit(0);
+  }
+
+  @Override
+  public int getStartPosition() {
+    return player.getStartPosition();
+  }
+
+  @Override
+  public int getSecondStartPosition() {
+    return player2.getStartPosition();
+  }
+
+}

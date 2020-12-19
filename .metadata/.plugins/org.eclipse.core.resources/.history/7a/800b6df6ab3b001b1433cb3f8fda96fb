@@ -1,0 +1,100 @@
+package htwmodel;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * This interface represents a Maze and contains all operations that all types
+ * of mazes should support.
+ */
+public interface Maze {
+
+  /**
+   * This method creates a Maze by removing walls and adding bats,pits and a
+   * Wumpus.
+   * 
+   */
+  void createMaze();
+
+  /**
+   * This method gets gets the location of the Wumpus.
+   * 
+   * @return String
+   */
+  String getWumpusPosition();
+
+  /**
+   * This method gets all the positions of where a bat is present.
+   * 
+   * @return Set of String
+   */
+  Set<String> getBatPositions();
+
+  /**
+   * This method gets all the positions of where a pit is present.
+   * 
+   * @return Set of String
+   */
+  Set<String> getPitPositions();
+
+  /**
+   * This method gets all the possible directions one can move to from a room.
+   * 
+   * @return a Map with key has the position and value as all the possible
+   *         locations it can move to
+   */
+  Map<String, List> getRoomDirections();
+
+  /**
+   * This method gets all the possible cardinal directions one can move to from a
+   * room.
+   * 
+   * @return a Map with key has the position and value as all the possible
+   *         locations it can move to
+   */
+  Map<String, List> getCardinalDirections();
+
+  /**
+   * This method gets a list of all the rooms.
+   * 
+   * @return List
+   */
+  List<String> getAllRooms();
+
+  /**
+   * This method gets all the wall in the maze.
+   * 
+   * @return integer
+   */
+  int getNumberOfWalls();
+
+  /**
+   * This method maps the walls to number to be used by the GUI.
+   * 
+   * @return Map
+   */
+  Map<String, Integer> getMappedValues();
+
+  /**
+   * This method constructs and gets all the crooked tunnels within the maze.
+   * 
+   * @return Set of String
+   */
+  Set<String> getCrookedTunnels();
+  
+  /**
+   * This method returns the number of rows in a maze.
+   * 
+   * @return integer
+   */
+  int getRows();
+
+  /**
+   * This method returns the number of columns in a maze.
+   * 
+   * @return integer
+   */
+  int getColumns();
+
+}

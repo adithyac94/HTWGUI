@@ -1,0 +1,31 @@
+package htw;
+
+import java.io.InputStreamReader;
+
+import htwcontroller.HtwController;
+import htwmodel.Maze;
+import htwmodel.Player;
+import htwmodel.PlayerModel;
+import htwmodel.WrappedMaze;
+import htwview.IntroView;
+
+
+
+public class Main2 {
+
+	public static void main(String[] args) {
+		
+		Player pl;
+		Maze m = new WrappedMaze(10,10,0,0,0);
+		m.createMaze();
+		pl = new PlayerModel(m,3);
+		
+		HtwController c = new HtwController(new InputStreamReader(System.in), System.out,pl);
+
+		IntroView view = new IntroView(c);
+
+		
+		
+	}
+	
+}

@@ -1,0 +1,594 @@
+package htwmodel;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
+import java.util.Set;
+
+/**
+ * An abstract Maze class that contains operations to construct a maze and add
+ * bats, pits, rooms and wumpus to the maze. It implements the maze interface.
+ * 
+ */
+public abstract class AbstractMaze implements Maze {
+
+  private int x;
+  private int y;
+  private int remainingWalls;
+  private int bats;
+  private int pits;
+  protected String[][] maze;
+
+  protected HashMap<String, Set> cellPaths = new HashMap<String, Set>();
+  protected HashMap<String, Set> possibleDirections = new HashMap<String, Set>();
+  private String wumpusPosition;
+  private Set<String> cellsWithPits = new HashSet<String>();
+  private Set<String> cellsWithBats = new HashSet<String>();
+  protected Set<String> allWalls = new HashSet<String>();
+  private List<String> rooms = new ArrayList<String>();
+  private List<String> tunnels = new ArrayList<String>();
+  private HashMap<String, Integer> mapValues = new HashMap<String, Integer>();
+
+  /**
+   * Protected constructor for use by maze subclasses.
+   * 
+   * @param x              the number of rows
+   * @param y              the number of columns
+   * @param remainingWalls the number of remaining walls.
+   */
+  protected AbstractMaze(int x, int y, int remainingWalls, int bats, int pits) {
+
+    if (bats > (x * y)) {
+      throw new IllegalArgumentException("Number of bats are too many");
+    }
+
+    if (pits > (x * y)) {
+      throw new IllegalArgumentException("Number of pits are too many");
+    }
+
+    this.x = x;
+    this.y = y;
+    this.remainingWalls = remainingWalls;
+    this.bats = bats;
+    this.pits = pits;
+  }
+
+  @Override
+  public String getWumpusPosition() {
+    return wumpusPosition;
+  }
+
+  @Override
+  public Set<String> getBatPositions() {
+    return cellsWithBats;
+  }
+
+  @Override
+  public Set<String> getPitPositions() {
+    return cellsWithPits;
+  }
+
+  @Override
+  public List<String> getAllRooms() {
+    return rooms;
+  }
+
+  @Override
+  public int getNumberOfWalls() {
+    return allWalls.size();
+  }
+
+  @Override
+  public int getRows() {
+    return x;
+  }
+
+  @Override
+  public int getColumns() {
+    return y;
+  }
+
+  @Override
+  public Map<String, Integer> getMappedValues() {
+    return mapValues;
+  }
+
+  /**
+   * This method creates 2D grid of a maze based on the number of rows and
+   * columns.
+   * 
+   */
+  protected void createGrid() {
+    maze = new String[x][y];
+    int k = 0;
+    for (int i = 0; i < x; ++i) {
+      for (int j = 0; j < y; ++j) {
+        maze[i][j] = Integer.toString(i) + Integer.toString(j);
+        mapValues.put(maze[i][j], k);
+        ++k;
+      }
+
+    }
+
+  }
+
+  /**
+   * This method adds rooms to the maze.
+   * 
+   */
+  private void addRooms() {
+    Iterator<Entry<String, Set>> itr = possibleDirections.entrySet().iterator();
+    Set<String> tunnels = getCrookedTunnels();
+    HashMap<String, List> finalPath = new HashMap<String, List>();
+    while (itr.hasNext()) {
+
+      HashMap.Entry<String, Set> entry = itr.next();
+
+      String parent = entry.getKey();
+      Set<String> directions = entry.getValue();
+      List<String> newPath = new ArrayList<String>();
+      if (directions.size() != 2) {
+        rooms.add(parent);
+      } else {
+        tunnels.add(parent);
+      }
+    }
+
+  }
+
+  /**
+   * This method adds a Wumpus at a random position within the maze.
+   * 
+   */
+  private void addWumpus() {
+
+    if (rooms.size() == 1) {
+      wumpusPosition = rooms.get(0);
+    } else {
+      int randomPos = new Random().nextInt(rooms.size() - 1);
+
+      wumpusPosition = rooms.get(randomPos);
+    }
+  }
+
+  /**
+   * This method adds n bottomless pits to random locations within the maze.
+   * 
+   */
+  private void addPits() {
+
+    if (pits > rooms.size()) {
+      throw new IllegalArgumentException("The number of pits are greater than the number of rooms");
+    }
+
+    int numOfPits = pits;
+    List<Integer> random = new ArrayList<Integer>();
+    for (int i = 0; i < rooms.size(); ++i) {
+      random.add(i);
+    }
+    Collections.shuffle(random);
+    while (numOfPits > 0) {
+
+      cellsWithPits.add(rooms.get(random.get(numOfPits - 1)));
+
+      --numOfPits;
+
+    }
+
+  }
+
+  /**
+   * This method adds n bats to random locations within the maze.
+   * 
+   */
+  private void addSuperBats() {
+
+    if (bats > rooms.size()) {
+      throw new IllegalArgumentException("The number of bats are greater than the number of rooms");
+    }
+
+    int numOfBats = bats;
+    List<Integer> random = new ArrayList<Integer>();
+    for (int i = 0; i < rooms.size(); ++i) {
+      random.add(i);
+    }
+    Collections.shuffle(random);
+
+    while (numOfBats > 0) {
+
+      cellsWithBats.add(rooms.get(random.get(numOfBats - 1)));
+
+      --numOfBats;
+
+    }
+
+  }
+
+  /**
+   * This method randomly removes the walls of the maze to create a perfect maze.
+   * 
+   */
+  protected void removeWall() {
+
+    checkRemainingWalls();
+
+    Set<String> copyAllWalls = new HashSet<String>();
+    copyAllWalls.addAll(allWalls);
+
+    int n = copyAllWalls.size();
+
+    while (n > 0) {
+      int rand = new Random().nextInt(copyAllWalls.size());
+
+      String wall = "";
+      Iterator<String> i = copyAllWalls.iterator();
+      int p = 0;
+      while (i.hasNext()) {
+        if (p == rand) {
+          wall = i.next();
+          break;
+        }
+        ++p;
+        i.next();
+      }
+      copyAllWalls.remove(wall);
+
+      Set<String> s1 = new HashSet<String>();
+      Set<String> s2 = new HashSet<String>();
+      Set<String> a1 = new HashSet<String>();
+      Set<String> a2 = new HashSet<String>();
+      Set<String> result = new HashSet<String>();
+      String[] wll = wall.split("\\.");
+      String e1 = wll[0];
+      String e2 = wll[1];
+
+      s1 = cellPaths.get(wll[0]);
+      s2 = cellPaths.get(wll[1]);
+      a1 = possibleDirections.get(wll[0]);
+      a2 = possibleDirections.get(wll[1]);
+      int k = 0;
+
+      if (s1.isEmpty()) {
+
+        s2.add(e1);
+        a2.add(e1);
+        cellPaths.put(e2, s2);
+        possibleDirections.put(e2, a2);
+
+        s1.add(e2);
+        a1.add(e2);
+        cellPaths.put(e1, s1);
+        possibleDirections.put(e1, a1);
+
+        result.addAll(s1);
+        result.addAll(s2);
+
+        Set<String> cells = cellPaths.keySet();
+        for (String d : cells) {
+
+          if (result.contains(d)) {
+            Set<String> set = cellPaths.get(d);
+            for (String c : result) {
+              if (!set.contains(c) && !c.equals(d)) {
+
+                set.add(c);
+
+              }
+            }
+
+            cellPaths.put(d, set);
+
+          }
+
+        }
+
+        allWalls.remove(wall);
+
+      }
+
+      else if (!s1.isEmpty() && !s1.contains(e2)) {
+
+        for (String a : s1) {
+
+          Set<String> copy = cellPaths.get(a);
+          if (copy.contains(s2)) {
+            k = 1;
+            break;
+          }
+
+        }
+
+        if (k != 1) {
+          s2.add(e1);
+          a2.add(e1);
+          cellPaths.put(e2, s2);
+          possibleDirections.put(e2, a2);
+
+          s1.add(e2);
+          a1.add(e2);
+          cellPaths.put(e1, s1);
+          possibleDirections.put(e1, a1);
+
+          result.addAll(s1);
+          result.addAll(s2);
+
+          Set<String> cells = cellPaths.keySet();
+          for (String d : cells) {
+
+            if (result.contains(d)) {
+              Set<String> set = cellPaths.get(d);
+              for (String c : result) {
+                if (!set.contains(c) && !c.equals(d)) {
+
+                  set.add(c);
+
+                }
+              }
+
+              cellPaths.put(d, set);
+
+            }
+
+          }
+
+          allWalls.remove(wall);
+
+        }
+
+      }
+
+      --n;
+
+    }
+
+    if (remainingWalls > 0) {
+
+      removingRemainingWalls();
+
+    }
+
+    addRooms();
+    addWumpus();
+    addSuperBats();
+    addPits();
+
+  }
+
+  /**
+   * This method randomly removes the remaining number of walls to create a room
+   * maze.
+   * 
+   */
+  private void removingRemainingWalls() {
+
+    int remain = allWalls.size() - remainingWalls;
+
+    while (remain > 0) {
+
+      Set<String> s1 = new HashSet<String>();
+      Set<String> s2 = new HashSet<String>();
+      Set<String> result = new HashSet<String>();
+
+      int rand = new Random().nextInt(allWalls.size());
+
+      String wall = "";
+      Iterator<String> i = allWalls.iterator();
+      int k = 0;
+      while (i.hasNext()) {
+        if (k == rand) {
+          wall = i.next();
+          break;
+        }
+        ++k;
+        i.next();
+      }
+      String[] wll = wall.split("\\.");
+      String e1 = wll[0];
+      String e2 = wll[1];
+      s1 = cellPaths.get(wll[0]);
+      s2 = cellPaths.get(wll[1]);
+      s2.add(e1);
+      cellPaths.put(e2, s2);
+
+      s1.add(e2);
+      cellPaths.put(e1, s1);
+
+      result.addAll(s1);
+      result.addAll(s2);
+
+      Set<String> cells = cellPaths.keySet();
+      for (String d : cells) {
+
+        if (result.contains(d)) {
+          Set<String> set = cellPaths.get(d);
+          for (String c : result) {
+            if (!set.contains(c) && !c.equals(d)) {
+
+              set.add(c);
+
+            }
+          }
+
+          cellPaths.put(d, set);
+          allWalls.remove(wall);
+        }
+
+      }
+      --remain;
+    }
+
+  }
+
+  /**
+   * This method checks if the number of remaining walls is valid.
+   * 
+   */
+  private void checkRemainingWalls() {
+    int threshold = allWalls.size() - (x * y) + 1;
+    if (remainingWalls > threshold || remainingWalls < 0) {
+      throw new IllegalArgumentException(
+          "The remaining number of walls cannot be more than " + threshold);
+    }
+  }
+
+  /**
+   * This method constructs and gets all the crooked tunnels within the maze.
+   * 
+   * @return Set of String
+   */
+  @Override
+  public Set<String> getCrookedTunnels() {
+
+    Set<String> crookedTunnels = new HashSet<String>();
+
+    Iterator<Entry<String, Set>> itr = possibleDirections.entrySet().iterator();
+
+    while (itr.hasNext()) {
+
+      HashMap.Entry<String, Set> entry = itr.next();
+
+      Set<String> directions = entry.getValue();
+
+      if (directions.size() == 2) {
+        crookedTunnels.add(entry.getKey());
+      }
+
+    }
+
+    return crookedTunnels;
+  }
+
+  @Override
+  public Map<String, List> getRoomDirections() {
+
+    Iterator<Entry<String, Set>> itr = possibleDirections.entrySet().iterator();
+    Set<String> tunnels = getCrookedTunnels();
+    HashMap<String, List> finalPath = new HashMap<String, List>();
+    while (itr.hasNext()) {
+
+      HashMap.Entry<String, Set> entry = itr.next();
+
+      String parent = entry.getKey();
+      Set<String> directions = entry.getValue();
+      List<String> newPath = new ArrayList<String>();
+      if (directions.size() != 2) {
+
+        for (String s : directions) {
+
+          if (tunnels.contains(s)) {
+
+            newPath.add(getPosition(parent, s));
+
+          }
+
+          else {
+            newPath.add(s);
+          }
+
+        }
+        finalPath.put(parent, newPath);
+      } else {
+        for (String s : directions) {
+          newPath.add(s);
+        }
+        finalPath.put(parent, newPath);
+      }
+    }
+
+    return finalPath;
+
+  }
+
+  @Override
+  public Map<String, List> getCardinalDirections() {
+
+    Iterator<Entry<String, Set>> itr = possibleDirections.entrySet().iterator();
+
+    HashMap<String, List> finalDirection = new HashMap<String, List>();
+    while (itr.hasNext()) {
+
+      HashMap.Entry<String, Set> entry = itr.next();
+
+      String parent = entry.getKey();
+      Set<String> directions = entry.getValue();
+      List<String> newPath = new ArrayList<String>();
+
+      for (String s : directions) {
+
+        newPath.add(getCardinalDirection(parent, s));
+
+      }
+
+      finalDirection.put(parent, newPath);
+
+    }
+
+    return finalDirection;
+
+  }
+
+  /**
+   * This method gets the cardinal direction from start position to end position.
+   *
+   * @param start The start position
+   * @param end   The end position
+   * 
+   * @return String
+   */
+  private String getCardinalDirection(String start, String end) {
+
+    int row = x;
+    int column = y;
+    int start1 = Integer.parseInt(start.substring(0, 1));
+    int start2 = Integer.parseInt(start.substring(1));
+    int end1 = Integer.parseInt(end.substring(0, 1).substring(0));
+    int end2 = Integer.parseInt(end.substring(1));
+
+    if (end1 == (start1 - 1) || (end1 == (row - 1) && start1 == 0)) {
+      return "North";
+    }
+    if (end1 == (start1 + 1) || (start1 == (row - 1) && end1 == 0)) {
+      return "South";
+    }
+
+    if (end2 == (start2 + 1) || (start2 == (column - 1) && end2 == 0)) {
+      return "East";
+    } else {
+      return "West";
+    }
+  }
+
+  private String getPosition(String parent, String pos) {
+
+    String result = "";
+    boolean t = true;
+    Set<String> set = getCrookedTunnels();
+    while (t) {
+
+      Set<String> str = possibleDirections.get(pos);
+
+      for (String s : str) {
+        if (!s.equals(parent)) {
+          if (!set.contains(s)) {
+            result = s;
+            t = false;
+          }
+
+          else {
+            parent = pos;
+            pos = s;
+            break;
+          }
+        }
+      }
+    }
+    return result;
+  }
+
+}

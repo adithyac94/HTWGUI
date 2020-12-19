@@ -1,0 +1,32 @@
+The example run shows the player being eaten by a Wumpus.
+
+RUN :-
+
+Enter Maze configuration
+Wrapped or Unwrapped(W/U)
+W
+Enter rows,columns and number of remaining walls of the Maze
+5 5 10
+Enter number of bats, pits and arrows
+2 2 2
+Select a starting position from the following list of rooms
+ [22, 02, 24, 04, 31, 12, 34, 14, 40, 41, 20, 42, 21, 43]
+22
+
+You are in Cave 22
+The Cave connects to [21]
+Shoot or Move (S-M)?
+M
+Where to?
+21
+You smell something terrible nearby :-O 
+You are in Cave 21
+The Cave connects to [22, 14, 31]
+
+Shoot or Move (S-M)?
+M
+Where to?
+31
+
+Chomp, chomp, chomp, thanks for feeding the Wumpus! :P 
+Better Luck Next Time

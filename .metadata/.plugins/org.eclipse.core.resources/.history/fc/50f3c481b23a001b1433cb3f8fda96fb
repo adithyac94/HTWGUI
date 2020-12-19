@@ -1,0 +1,574 @@
+package htwview;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+import javax.imageio.ImageIO;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+
+import htwcontroller.IController2;
+
+public class htwView3 extends JFrame implements KeyListener {
+  private static final long serialVersionUID = 5883479994622814210L;
+
+  private JLabel player;
+  private JLabel player2;
+  private JPanel panel;
+  JLabel oldLabel = null;
+  int oldValue = -1;
+  private JLabel arrowCount;
+  IController2 ic2;
+
+  public htwView3(IController2 ic2) {
+    super("Hunt The Wumpus");
+    this.ic2 = ic2;
+
+  }
+
+  public void createGrid(int x, int y, List<Integer> rooms, Map<Integer, List> cardinalDirections) {
+
+    panel = new JPanel(new GridLayout(x, y, 0, 0));
+    panel.setBackground(Color.WHITE);
+    
+    JPanel mainPanel = new JPanel();
+    mainPanel.setLayout(new BorderLayout());
+    
+    arrowCount = new JLabel("ArrowCount "+3);
+    arrowCount.setFont(new Font("Verdana",1,20));
+    JPanel subPanel1 = new JPanel();
+    subPanel1.setLayout(new BoxLayout(subPanel1, BoxLayout.Y_AXIS));
+    JButton restart = new JButton("Restart");
+    restart.setAlignmentX(Component.CENTER_ALIGNMENT);
+    subPanel1.add(new JLabel("Panel One"));
+    subPanel1.setPreferredSize(new Dimension(300, 300));
+    subPanel1.setBackground(Color.CYAN);
+    
+    ImageIcon grassIcon2 = new ImageIcon("C:/Users/Adithya/Wumpus/wumpus/src/player.png");
+    Image img2 = grassIcon2.getImage();
+    Image newImg2 = img2.getScaledInstance(10, 10, java.awt.Image.SCALE_SMOOTH);
+    ImageIcon newIcon2 = new ImageIcon(newImg2);
+
+    int size = x * y;
+    for (int i = 0; i < size; ++i) {
+
+      if (rooms.contains(i)) {
+
+        JLabel tile = makeRoomLabelIcon(i, cardinalDirections);
+        tile.setName(Integer.toString(i));
+        tile.setVisible(false);
+        panel.add(tile);
+      }
+
+      else {
+
+        JLabel tile = makeTunnelLabelIcon(i, cardinalDirections);
+        tile.setName(Integer.toString(i));
+        tile.setVisible(false);
+        panel.add(tile);
+      }
+    }
+
+    player = makeLabelIcon(newIcon2);
+    updatePlayerPosition(ic2.getStartPosition(), false, false);
+    player2 = makeLabelIcon(newIcon2);
+    updatePlayerPosition2(ic2.getSecondStartPosition(), false, false);
+    panel.addMouseListener(createMouseListener());
+    subPanel1.add(restart);
+    subPanel1.add(arrowCount);
+    restart.addActionListener(restart());
+    this.addKeyListener(this);
+    this.setResizable(false);
+    JScrollPane scrPane = new JScrollPane(panel);
+    mainPanel.add(scrPane,BorderLayout.WEST);
+    mainPanel.add(subPanel1,BorderLayout.EAST);
+    this.add(mainPanel);
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.pack();
+    this.setLocationRelativeTo(null);
+    this.setVisible(true);
+    // addQuit(this);
+
+  }
+
+  public static void addQuit(JFrame frame) {
+    ActionListener actionQuit = new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent event) {
+        System.exit(0);
+      }
+    };
+
+    Box quitBox = new Box(BoxLayout.X_AXIS);
+    frame.add(quitBox, BorderLayout.SOUTH);
+    JButton quitButton = new JButton("Quit");
+    quitButton.addActionListener(actionQuit);
+    quitBox.add(Box.createHorizontalGlue());
+    quitBox.add(quitButton);
+  }
+
+  protected JLabel makeLabelIcon(ImageIcon Icon) {
+    JLabel label = new JLabel(Icon);
+    label.setBorder(new CompoundBorder(new LineBorder(Color.GRAY), new EmptyBorder(4, 4, 4, 4)));
+    return label;
+  }
+
+  protected JLabel makeTunnelLabelIcon(int pos, Map<Integer, List> cardinalDirections) {
+
+    List<String> dirs = cardinalDirections.get(pos);
+    System.out.println(pos + " " + dirs);
+    JLabel tile = null;
+    if (dirs.contains("North") && dirs.contains("East")) {
+
+      ImageIcon grassIcon = new ImageIcon(
+          "C:/Users/Adithya/HTW/htw-view-images/res/Tunnels/hallway-ne.png");
+      Image img = grassIcon.getImage();
+      Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+      ImageIcon newIcon = new ImageIcon(newImg);
+
+      tile = makeLabelIcon(newIcon);
+
+    }
+
+    if (dirs.contains("North") && dirs.contains("West")) {
+
+      ImageIcon grassIcon = new ImageIcon(
+          "C:/Users/Adithya/HTW/htw-view-images/res/Tunnels/hallway-wn.png");
+      Image img = grassIcon.getImage();
+      Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+      ImageIcon newIcon = new ImageIcon(newImg);
+
+      tile = makeLabelIcon(newIcon);
+
+    }
+
+    if (dirs.contains("South") && dirs.contains("East")) {
+
+      ImageIcon grassIcon = new ImageIcon(
+          "C:/Users/Adithya/HTW/htw-view-images/res/Tunnels/hallway.png");
+      Image img = grassIcon.getImage();
+      Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+      ImageIcon newIcon = new ImageIcon(newImg);
+
+      tile = makeLabelIcon(newIcon);
+
+    }
+
+    if (dirs.contains("South") && dirs.contains("West")) {
+
+      ImageIcon grassIcon = new ImageIcon(
+          "C:/Users/Adithya/HTW/htw-view-images/res/Tunnels/hallway-ws.png");
+      Image img = grassIcon.getImage();
+      Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+      ImageIcon newIcon = new ImageIcon(newImg);
+
+      tile = makeLabelIcon(newIcon);
+
+    }
+
+    if (dirs.contains("South") && dirs.contains("North")) {
+
+      ImageIcon grassIcon = new ImageIcon(
+          "C:/Users/Adithya/HTW/htw-view-images/res/Tunnels/hallway-vertical.png");
+      Image img = grassIcon.getImage();
+      Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+      ImageIcon newIcon = new ImageIcon(newImg);
+
+      tile = makeLabelIcon(newIcon);
+
+    }
+
+    if (dirs.contains("East") && dirs.contains("West")) {
+
+      ImageIcon grassIcon = new ImageIcon(
+          "C:/Users/Adithya/HTW/htw-view-images/res/Tunnels/hallway-straight.png");
+      Image img = grassIcon.getImage();
+      Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+      ImageIcon newIcon = new ImageIcon(newImg);
+
+      tile = makeLabelIcon(newIcon);
+
+    }
+    return tile;
+  }
+
+  protected JLabel makeRoomLabelIcon(int pos, Map<Integer, List> cardinalDirections) {
+
+    List<String> dirs = cardinalDirections.get(pos);// pl.getDirections(pos);
+    JLabel tile = null;
+
+    if (dirs.size() == 1) {
+
+      if (dirs.contains("North")) {
+
+        ImageIcon grassIcon = new ImageIcon(
+            "C:/Users/Adithya/HTW/htw-view-images/res/RoomBases/roombase-north.png");
+        Image img = grassIcon.getImage();
+        Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+        ImageIcon newIcon = new ImageIcon(newImg);
+
+        tile = makeLabelIcon(newIcon);
+
+      }
+
+      if (dirs.contains("South")) {
+
+        ImageIcon grassIcon = new ImageIcon(
+            "C:/Users/Adithya/HTW/htw-view-images/res/RoomBases/roombase-south.png");
+        Image img = grassIcon.getImage();
+        Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+        ImageIcon newIcon = new ImageIcon(newImg);
+        tile = makeLabelIcon(newIcon);
+      }
+      if (dirs.contains("East")) {
+
+        ImageIcon grassIcon = new ImageIcon(
+            "C:/Users/Adithya/HTW/htw-view-images/res/RoomBases/roombase-east.png");
+        Image img = grassIcon.getImage();
+        Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+        ImageIcon newIcon = new ImageIcon(newImg);
+        tile = makeLabelIcon(newIcon);
+      }
+      if (dirs.contains("West")) {
+
+        ImageIcon grassIcon = new ImageIcon(
+            "C:/Users/Adithya/HTW/htw-view-images/res/RoomBases/roombase-west.png");
+        Image img = grassIcon.getImage();
+        Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+        ImageIcon newIcon = new ImageIcon(newImg);
+        tile = makeLabelIcon(newIcon);
+      }
+
+    }
+
+    else if (dirs.size() == 3) {
+
+      if (!dirs.contains("North")) {
+
+        ImageIcon grassIcon = new ImageIcon(
+            "C:/Users/Adithya/HTW/htw-view-images/res/RoomBases/roombase-3.png");
+        Image img = grassIcon.getImage();
+        Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+        ImageIcon newIcon = new ImageIcon(newImg);
+
+        tile = makeLabelIcon(newIcon);
+
+      }
+
+      if (!dirs.contains("South")) {
+
+        ImageIcon grassIcon = new ImageIcon(
+            "C:/Users/Adithya/HTW/htw-view-images/res/RoomBases/roombase3-south.png");
+        Image img = grassIcon.getImage();
+        Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+        ImageIcon newIcon = new ImageIcon(newImg);
+        tile = makeLabelIcon(newIcon);
+      }
+      if (!dirs.contains("East")) {
+
+        ImageIcon grassIcon = new ImageIcon(
+            "C:/Users/Adithya/HTW/htw-view-images/res/RoomBases/roombase3-east.png");
+        Image img = grassIcon.getImage();
+        Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+        ImageIcon newIcon = new ImageIcon(newImg);
+        tile = makeLabelIcon(newIcon);
+      }
+      if (!dirs.contains("West")) {
+
+        ImageIcon grassIcon = new ImageIcon(
+            "C:/Users/Adithya/HTW/htw-view-images/res/RoomBases/roombase3-west.png");
+        Image img = grassIcon.getImage();
+        Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+        ImageIcon newIcon = new ImageIcon(newImg);
+        tile = makeLabelIcon(newIcon);
+      }
+
+    }
+
+    else if (dirs.size() == 4) {
+
+      ImageIcon grassIcon = new ImageIcon(
+          "C:/Users/Adithya/HTW/htw-view-images/res/RoomBases/roombase-4.png");
+      Image img = grassIcon.getImage();
+      Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+      ImageIcon newIcon = new ImageIcon(newImg);
+      tile = makeLabelIcon(newIcon);
+    }
+
+    else {
+      ImageIcon grassIcon = new ImageIcon(
+          "C:/Users/Adithya/HTW/htw-view-images/res/RoomBases/roombase-3.png");
+      Image img = grassIcon.getImage();
+      Image newImg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
+      ImageIcon newIcon = new ImageIcon(newImg);
+      tile = makeLabelIcon(newIcon);
+    }
+    try {
+      if (pos == ic2.getWumpusPosition()) {
+        Image fgImage;
+
+        fgImage = ImageIO.read(new File("C:/Users/Adithya/HTW/htw-view-images/res/wumpus.png"));
+
+        BufferedImage newImage = appendNewImage(fgImage, tile);
+        tile.setIcon(new ImageIcon(newImage));
+      }
+
+      if (ic2.getBatPositions().contains(pos)) {
+        Image fgImage;
+
+        fgImage = ImageIO.read(new File("C:/Users/Adithya/HTW/htw-view-images/res/superBat.png"));
+
+        BufferedImage newImage = appendNewImage(fgImage, tile);
+        tile.setIcon(new ImageIcon(newImage));
+      }
+      if (ic2.getPitPositions().contains(pos)) {
+        Image fgImage;
+
+        fgImage = ImageIO.read(new File("C:/Users/Adithya/HTW/htw-view-images/res/slime-pit.png"));
+
+        BufferedImage newImage = appendNewImage(fgImage, tile);
+        tile.setIcon(new ImageIcon(newImage));
+      }
+
+      
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return tile;
+  }
+
+  protected void updateFrame(JPanel panel2) {
+    this.validate();
+
+  }
+
+  protected JLabel makeLabel(String text) {
+    JLabel label = new JLabel(text);
+    label.setBorder(new CompoundBorder(new LineBorder(Color.GRAY), new EmptyBorder(4, 4, 4, 4)));
+    return label;
+  }
+
+  @Override
+  public void keyPressed(KeyEvent e) {
+
+    if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+      ic2.movePlayer("West");
+    }
+    if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+      ic2.movePlayer("East");
+    }
+    if (e.getKeyCode() == KeyEvent.VK_UP) {
+      ic2.movePlayer("North");
+    }
+
+    if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+
+      ic2.movePlayer("South");
+    }
+    
+    if (e.getKeyCode() == KeyEvent.VK_S) {
+      ShootPrompt shoot = new ShootPrompt(ic2);
+      ic2.shootArrow(3,5);
+    }
+
+  }
+
+  public ActionListener restart() {
+    resetFocus();
+    return new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        ic2.generateGrid(new htwView3(ic2));
+        dispose();
+        getContentPane().removeAll();
+        repaint();        
+      }
+    };
+   
+  }
+  
+  private BufferedImage appendNewImage(Image fgImage, JLabel oldLabel) {
+
+    BufferedImage finalImage = null;
+
+    // Image fgImage = ImageIO.read(new
+    // File("C:/Users/Adithya/HTW/htw-view-images/res/wumpus-nearby.png"));
+
+    ImageIcon icon = (ImageIcon) oldLabel.getIcon();
+    Image bgImage = icon.getImage();
+
+    int w = bgImage.getWidth(null);
+    int h = bgImage.getHeight(null);
+
+    finalImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+    Graphics2D g = finalImage.createGraphics();
+    g.drawImage(bgImage, 0, 0, null);
+    g.drawImage(fgImage, 25, 25, null);
+    g.dispose();
+
+    return finalImage;
+
+  }
+
+  public void resetFocus() {
+    this.setFocusable(true);
+    this.requestFocus();
+  }
+
+  public void makeVisible(List<Integer> listOfTunnels) {
+
+    for (int t : listOfTunnels) {
+      JLabel label = (JLabel) panel.getComponent(t);
+      label.setVisible(true);
+      panel.remove(t);
+      panel.add(label, t);
+
+    }
+
+  }
+
+  public void updatePlayerPosition(int pos, boolean wumpusWarning, boolean pitWarning) {
+
+    if (oldLabel != null) {
+      panel.remove(oldValue);
+      oldLabel.setVisible(true);
+      oldLabel.setName(Integer.toString(oldValue));
+      System.out.println("Old Label Name " + oldLabel.getName());
+      panel.add(oldLabel, oldValue);
+    }
+    try {
+      oldLabel = (JLabel) panel.getComponent(pos);
+      oldValue = pos;
+      panel.remove(pos);
+      if (wumpusWarning) {
+        Image fgImage = ImageIO
+            .read(new File("C:/Users/Adithya/HTW/htw-view-images/res/wumpus-nearby.png"));
+        BufferedImage newImage2 = appendNewImage(fgImage, oldLabel);
+        oldLabel.setIcon(new ImageIcon(newImage2));
+      }
+      if (pitWarning) {
+
+        Image fgImage = ImageIO
+            .read(new File("C:/Users/Adithya/HTW/htw-view-images/res/slime-pit-nearby.png"));
+        BufferedImage newImage2 = appendNewImage(fgImage, oldLabel);
+        oldLabel.setIcon(new ImageIcon(newImage2));
+
+      }
+
+      Image fgImage = ImageIO.read(new File("C:/Users/Adithya/Wumpus/wumpus/src/player.png"));
+      BufferedImage newImage = appendNewImage(fgImage, oldLabel);
+      player.setIcon(new ImageIcon(newImage));
+      player.setName(Integer.toString(pos));
+      player.setVisible(true);
+      panel.add(player, pos);
+      updateFrame(panel);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+  
+  public void updatePlayerPosition2(int pos, boolean wumpusWarning, boolean pitWarning) {
+
+    if (oldLabel != null) {
+      panel.remove(oldValue);
+      oldLabel.setVisible(true);
+      oldLabel.setName(Integer.toString(oldValue));
+      System.out.println("Old Label Name " + oldLabel.getName());
+      panel.add(oldLabel, oldValue);
+    }
+    try {
+      oldLabel = (JLabel) panel.getComponent(pos);
+      oldValue = pos;
+      panel.remove(pos);
+      if (wumpusWarning) {
+        Image fgImage = ImageIO
+            .read(new File("C:/Users/Adithya/HTW/htw-view-images/res/wumpus-nearby.png"));
+        BufferedImage newImage2 = appendNewImage(fgImage, oldLabel);
+        oldLabel.setIcon(new ImageIcon(newImage2));
+      }
+      if (pitWarning) {
+
+        Image fgImage = ImageIO
+            .read(new File("C:/Users/Adithya/HTW/htw-view-images/res/slime-pit-nearby.png"));
+        BufferedImage newImage2 = appendNewImage(fgImage, oldLabel);
+        oldLabel.setIcon(new ImageIcon(newImage2));
+
+      }
+
+      Image fgImage = ImageIO.read(new File("C:/Users/Adithya/Wumpus/wumpus/src/player.png"));
+      BufferedImage newImage = appendNewImage(fgImage, oldLabel);
+      player2.setIcon(new ImageIcon(newImage));
+      player2.setName(Integer.toString(pos));
+      player2.setVisible(true);
+      panel.add(player2, pos);
+      updateFrame(panel);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Override
+  public void keyReleased(KeyEvent e) {
+
+  }
+
+  @Override
+  public void keyTyped(KeyEvent e) {
+    // TODO Auto-generated method stub
+
+  }
+
+  private MouseAdapter createMouseListener() {
+    return new MouseAdapter() {
+      @Override
+      public void mousePressed(MouseEvent e) {
+        JPanel panel = (JPanel) e.getSource();
+        JLabel label = (JLabel) panel.getComponentAt(e.getX(), e.getY());
+        if (oldLabel != null) {
+          System.out.println("Old Label Name " + oldLabel.getName());
+          System.out.println("Mouse Label name " + label.getName());
+
+          ic2.getAdjacentRooms(Integer.parseInt(oldLabel.getName()),
+              Integer.parseInt(label.getName()));
+
+        }
+      }
+    };
+  }
+
+  public void displayFailureMessage() {    
+    this.disable();
+    
+  }
+
+}

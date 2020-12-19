@@ -1,0 +1,58 @@
+package htwview;
+
+import java.awt.BorderLayout;
+import java.awt.Font;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+public class MessageView extends JFrame {
+  JLabel rules;
+  JPanel panel;
+
+  public MessageView() {
+    panel = new JPanel();
+    panel.setLayout(new BorderLayout());
+    rules = new JLabel(
+        "<html><p><strong><span style=\"font-size: 17px; color: rgb(226, 80, 65);\">Rules</span></strong></p>\r\n"
+            + "<ul>\r\n"
+            + "    <li><span style=\"font-family: Comic Sans MS, sans-serif;\">There are 3 hazards:</span>\r\n"
+            + "        <ol>\r\n"
+            + "            <li><span style=\"font-family: Comic Sans MS, sans-serif;\">A bottomless pit (you will feel a breeze nearby).</span></li>\r\n"
+            + "            <li><span style=\"font-family: Comic Sans MS, sans-serif;\">A colony of bats that will pick you up and drop you in a random space"
+            + "--including into a pit or in to the mouth of the Wumpus.</span></li>\r\n"
+            + "            <li><span style=\"font-family: Comic Sans MS, sans-serif;\">A fearsome, hungry, and unbathed Wumpus (you will smell it nearby)."
+            + "</span></li>\r\n" + "        </ol>\r\n" + "    </li>\r\n"
+            + "    <li><span style=\"font-family: Comic Sans MS, sans-serif;\">The Wumpus is heavy; bats cannot lift him.</span></li>\r\n"
+            + "    <li><span style=\"font-family: Comic Sans MS, sans-serif;\">The Wumpus is covered in suckers; he won&apos;t fall down the bottomless pit.</span></li>\r\n"
+            + "    <li><span style=\"font-family: Comic Sans MS, sans-serif;\">For a two player mode, the player takes turns to move to the next room or shoot an arrow."
+            + " An invalid move will be counted as a turn.</span></li>\r\n"
+            + "    <li><span style=\"font-family: Comic Sans MS, sans-serif;\">If two players enter the same room, then one of the players will go in to hiding."
+            + " The user will have to move the move the player for it to become visible again.</span></li>\r\n"
+            + "    <li><span style=\"font-family: Comic Sans MS, sans-serif;\">The setting option lets you create a maze. (Default is a 10X10 maze).</span></li>\r\n"
+            + "</ul>\r\n"
+            + "<p><strong><span style=\"font-size: 17px; color: rgb(226, 80, 65);\">Controls</span></strong></p>\r\n"
+            + "<ul>\r\n"
+            + "    <li><span style=\"font-family: Comic Sans MS, sans-serif;\">Use Arrow Keys to move the Player using the Keyboard.</span></li>\r\n"
+            + "    <li><span style=\"font-family: Comic Sans MS, sans-serif;\">To move using a mouse, click on a valid room.</span></li>\r\n"
+            + "    <li><span style=\"font-family: Comic Sans MS, sans-serif;\">Clicking on the restart button will restart the game with the same maze.</span></li>\r\n"
+            + "</ul><html>");
+
+    rules.setFont(new Font("Serif", Font.BOLD, 20));
+    panel.add(rules);
+
+    JButton ok = new JButton("OK");
+
+    panel.add(ok, BorderLayout.SOUTH);
+    this.setResizable(false);
+    this.add(panel);
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.pack();
+    this.setLocationRelativeTo(null);
+    this.setVisible(true);
+
+  }
+
+}

@@ -1,0 +1,35 @@
+The example run shows the player losing by falling into a pit. 
+The run also shows the player ducking a superbat.
+
+RUN :-
+
+Enter Maze configuration
+Wrapped or Unwrapped(W/U)
+U
+Enter rows,columns and number of remaining walls of the Maze
+5 5 0
+Enter number of bats, pits and arrows
+3 3 3
+Select a starting position from the following list of rooms
+ [00, 44, 23, 24, 04, 10, 32, 33, 34, 13, 14, 41, 20, 42, 21, 43]
+00
+
+
+Whoa -- you successfully duck superbats that try to grab you
+You are in Cave 00
+The Cave connects to [10]
+Shoot or Move (S-M)?
+M
+Where to?
+10
+You feel a cold wind blowing
+You are in Cave 10
+The Cave connects to [13, 00, 20]
+
+Shoot or Move (S-M)?
+M
+Where to?
+13
+
+Oh no..Down the rabbit hole you go!!! 
+Better Luck Next Time

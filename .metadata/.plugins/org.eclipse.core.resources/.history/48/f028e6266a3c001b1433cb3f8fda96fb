@@ -1,0 +1,32 @@
+package htw;
+
+import java.io.InputStreamReader;
+
+import htwcontroller.IController;
+import htwcontroller.IController2;
+import htwmodel.Maze;
+import htwmodel.Player2;
+import htwmodel.PlayerModel2;
+import htwmodel.UnWrappedMaze;
+import htwmodel.WrappedMaze;
+import htwview.htwView;
+import htwview.htwView2;
+import htwview.htwView3;
+
+public class Main2 {
+
+	public static void main(String[] args) {
+		
+		Player2 pl;
+		Maze m = new WrappedMaze(7,5,0,0,0);
+		m.createMaze();
+		pl = new PlayerModel2(m,3);
+		
+		IController c = new IController(new InputStreamReader(System.in), System.out,pl);
+		htwView2 view = new htwView2(c);
+		c.generateGrid(view);
+		
+		
+	}
+	
+}

@@ -1,0 +1,120 @@
+package htwmock;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import htwmodel.Player;
+
+/**
+ * This represents an abstract mock class to test the controller in isolation.It
+ * implements the Player interface.
+ * 
+ */
+public abstract class MockAbstractPlayer implements Player2 {
+
+  private StringBuilder log;
+  protected final int uniqueCode;
+  protected final boolean uniqueCheck;
+
+  /**
+   * Protected constructor for use by Mock Player subclasses.
+   * 
+   * @param log         StringBuilder
+   * @param uniqueCode  Unique Integer
+   * @param uniqueCheck Unique Boolean
+   */
+  protected MockAbstractPlayer(StringBuilder log, int uniqueCode, boolean uniqueCheck) {
+    this.log = log;
+    this.uniqueCode = uniqueCode;
+    this.uniqueCheck = uniqueCheck;
+
+  }
+
+  @Override
+  public boolean isPitClose() {
+    return false;
+  }
+
+  @Override
+  public boolean isWumpusClose() {
+    return false;
+  }
+
+  @Override
+  public void move(String pos) {
+    log.append("Position " + pos);
+
+  }
+
+  @Override
+  public boolean isEaten() {
+    return false;
+  }
+
+  @Override
+  public boolean hasFallen() {
+    return false;
+  }
+
+  @Override
+  public List<String> getTunnelLeads() {
+    Map<String, List> tunnelLeads = new HashMap<String, List>();
+    tunnelLeads.put("00", Arrays.asList("10"));
+    tunnelLeads.put("11", Arrays.asList("12", "10", "22"));
+    tunnelLeads.put("22", Arrays.asList("11"));
+    tunnelLeads.put("12", Arrays.asList("11"));
+    tunnelLeads.put("20", Arrays.asList("10"));
+    tunnelLeads.put("10", Arrays.asList("11", "00", "20"));
+    return tunnelLeads.get(getStartPosition());
+  }
+
+  @Override
+  public String getStartPosition() {
+    return "00";
+  }
+
+  @Override
+  public List<String> getRooms() {
+    List<String> rooms = new ArrayList<String>();
+    rooms = Arrays.asList("00", "11", "22", "12", "20", "10");
+    return rooms;
+  }
+
+  @Override
+  public String getCurrentPosition() {
+    return "00";
+  }
+
+  @Override
+  public int isCaughtByBat(String pos) {
+
+    return -2;
+  }
+
+  @Override
+  public int shoot(String pos, int caves) {
+    log.append(" Current Position " + pos + " Caves " + caves);
+    return uniqueCode;
+  }
+
+  @Override
+  public void setStartPosition(String startPosition) {
+    log.append(" Start Position " + startPosition);
+
+  }
+
+  @Override
+  public Map<Integer,List> getNumber(){
+	  return null;
+  }
+  
+  @Override
+  public List<Integer> getRoomNumbers() {
+  	// TODO Auto-generated method stub
+  	return null;
+  }
+  
+}

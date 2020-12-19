@@ -1,0 +1,54 @@
+The example run shows the player killing the Wumpus.
+
+Run :-
+
+Enter Maze configuration
+Wrapped or Unwrapped(W/U)
+W
+Enter rows,columns and number of remaining walls of the Maze
+6 6 0
+Enter number of bats, pits and arrows
+2 2 3
+Select a starting position from the following list of rooms
+ [22, 44, 01, 23, 03, 25, 04, 05, 50, 51, 30, 52, 53, 32, 54, 33, 12, 34, 13, 35, 14, 15, 42, 21, 43]
+22
+
+You are in Cave 22
+The Cave connects to [32]
+Shoot or Move (S-M)?
+M
+Where to?
+32
+You smell something terrible nearby :-O 
+You are in Cave 32
+The Cave connects to [33, 22, 50, 42]
+
+Shoot or Move (S-M)?
+S
+No. of caves (1-5)?
+1
+Toward cave?
+50
+
+Shoot or Move (S-M)?
+S
+No. of caves (1-5)?
+1
+Toward cave?
+42
+
+Shoot or Move (S-M)?
+S
+No. of caves (1-5)?
+1
+Toward cave?
+22
+
+Shoot or Move (S-M)?
+S
+No. of caves (1-5)?
+1
+Toward cave?
+33
+Hee hee hee, you got the wumpus! ^|^ 
+Next time you won't be so lucky

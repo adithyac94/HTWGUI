@@ -1,0 +1,48 @@
+package htwcontroller;
+
+public interface Features {
+  
+  /**
+   * This method moves the player in the direction specified by the user.
+   * It also checks if the player is eaten by the wumpus, picked up by a bat or
+   * has fallen into a pit.
+   * 
+   * @param dir direction
+   * 
+   */
+  void movePlayer(String direction);
+  
+  /**
+   * This method moves the player in the direction specified by the user.
+   * It also checks if the player is eaten by the wumpus, picked up by a bat or
+   * has fallen into a pit.
+   * 
+   * @param pos Position of the player
+   * @param newPos Position the player wants to move to
+   * 
+   */
+  void getAdjacentRooms(int pos, int newPos);
+  
+  /**
+   * This method enables the player to shoot an arrow given the direction and the number of caves.
+   * 
+   * @param caveDirection The direction
+   * @param caveNum The number of caves
+   * 
+   */
+  void shootArrow(String caveDirection, int caveNum);
+  
+  /**
+   * This method gets the start position of player 1.
+   * 
+   * @param caveDirection The direction
+   * @param caveNum The number of caves
+   * 
+   */
+  int getStartPosition();
+  
+  int getSecondStartPosition();
+  
+  void generateGrid();
+
+}

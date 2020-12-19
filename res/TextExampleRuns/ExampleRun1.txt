@@ -1,0 +1,74 @@
+The example run shows the player being transported by a Super-Bat.
+The Super-Bat finally drops the player in a cave containing a pit.
+
+RUN :-
+
+Enter Maze configuration
+Wrapped or Unwrapped(W/U)
+U
+Enter rows,columns and number of remaining walls of the Maze
+5 5  0
+Enter number of bats, pits and arrows
+4 2 2
+Select a starting position from the following list of rooms
+ [00, 44, 23, 02, 31, 10, 32, 33, 12, 13, 14, 40, 41, 42]
+00
+
+
+Whoa -- you successfully duck superbats that try to grab you
+You are in Cave 00
+The Cave connects to [02]
+Shoot or Move (S-M)?
+M
+Where to?
+02
+You are in Cave 02
+The Cave connects to [12, 00, 14]
+
+Shoot or Move (S-M)?
+M
+Where to?
+12
+
+Snatch -- you are grabbed by superbats ^^ ^^ and ...
+You are dropped in Cave 44
+You are in Cave 44
+The Cave connects to [33]
+
+Shoot or Move (S-M)?
+M
+Where to?
+33
+
+Snatch -- you are grabbed by superbats ^^ ^^ and ...
+You are dropped in Cave 12
+You feel a cold wind blowing
+You are in Cave 12
+The Cave connects to [23, 10, 02]
+
+Shoot or Move (S-M)?
+M
+Where to?
+10
+You are in Cave 10
+The Cave connects to [12]
+
+Shoot or Move (S-M)?
+M
+Where to?
+12
+
+Whoa -- you successfully duck superbats that try to grab you
+You are in Cave 10
+The Cave connects to [12]
+
+Shoot or Move (S-M)?
+M
+Where to?
+12
+
+Snatch -- you are grabbed by superbats ^^ ^^ and ...
+You are dropped in Cave 23
+
+Oh no..Down the rabbit hole you go!!! 
+Better Luck Next Time

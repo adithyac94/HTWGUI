@@ -1,0 +1,65 @@
+package htw;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Scanner;
+
+import htwcontroller.HtwController;
+import htwmodel.Maze;
+import htwmodel.Player;
+import htwmodel.PlayerModel;
+import htwmodel.WrappedMaze;
+import htwview.IntroView;
+
+public class Main {
+
+  public static void main(String[] args) {
+
+    if (args[0].equalsIgnoreCase("--text")) {
+
+      Scanner myObj = new Scanner(System.in);
+
+      System.out.println("Enter Maze configuration");
+      System.out.println("Wrapped or Unwrapped(W/U)");
+      String mazeType = myObj.nextLine();
+      System.out.println("Enter rows,columns and number of remaining walls of the Maze");
+      int rows = myObj.nextInt();
+      int columns = myObj.nextInt();
+      int remainingColumns = myObj.nextInt();
+
+      System.out.println("Enter number of bats, pits and arrows");
+
+      int bats = myObj.nextInt();
+      int pits = myObj.nextInt();
+      int arrows = myObj.nextInt();
+
+      Player p = new PlayerModel(mazeType, rows, columns, remainingColumns, bats, pits, arrows);
+
+      HtwController ic = new HtwController(new InputStreamReader(System.in), System.out, p);
+      try {
+        ic.start(p);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+
+    }
+
+    else if (args[0].equalsIgnoreCase("--gui")) {
+      Player pl;
+      Maze m = new WrappedMaze(10, 10, 0, 0, 0);
+      m.createMaze();
+      pl = new PlayerModel(m, 3);
+
+      HtwController c = new HtwController(new InputStreamReader(System.in), System.out, pl);
+
+      IntroView view = new IntroView(c);
+    }
+    
+    else {
+      System.out.println("Invalid Command!!!");
+      System.exit(0);
+    }
+
+  }
+
+}

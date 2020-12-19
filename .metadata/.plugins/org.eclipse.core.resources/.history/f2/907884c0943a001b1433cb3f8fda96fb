@@ -1,0 +1,164 @@
+package htwcontroller;
+
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.io.IOException;
+import java.util.List;
+import java.util.Scanner;
+
+import htwmodel.Player;
+import htwmodel.Player2;
+import htwmodel.PlayerModel2;
+import htwview.MessageView;
+import htwview.ShootPrompt;
+import htwview.htwView;
+import htwview.htwView2;
+import htwview.htwView3;
+
+/**
+ * This is the controller class which takes keyboard input, and outputs the
+ * state of the game to the screen. It takes inputs from the user to navigate
+ * the player through the maze and shoot an arrow in the given direction.
+ * 
+ */
+public class IController2 {
+
+  private final Readable in;
+  private final Appendable out;
+
+  private Player2 model;
+  private htwView3 view;
+  private int k;
+  private boolean flag;
+
+  /**
+   * Public constructor to construct the controller object.
+   * 
+   * @param in  Readable input
+   * @param out Appendable output
+   */
+  public IController2(Readable in, Appendable out, Player2 model) {
+
+    this.out = out;
+    this.in = in;
+
+    this.model = model;
+    this.k = 1;
+    this.flag = false;
+    // view.setListeners(this);
+  }
+
+  public void setView() {
+
+    // view = new htwView3(model);
+
+  }
+
+  public void movePlayer(String dir) {
+    PlayerModel2 model2 = new PlayerModel2(model.getMaze(),3);
+    model2.setStartPosition(model2.getRooms().get(2));
+    System.out.println("Model2 "+model2.getCurrentPosition());
+    Player2 moveModel = model;
+    
+    if(flag==true) {
+    
+    if(k==1) {
+      moveModel = model;
+    k=2;
+    }
+    else {
+      moveModel = model2;
+      k=1;
+    }
+    }
+    int prev = moveModel.getCurrentPosition();
+    System.out.println("Inside Controller");
+    System.out.println(moveModel.getCurrentPosition() + dir);
+    List<String> directions = moveModel.getCardinalDirections();
+    if (directions.contains(dir)) {
+      moveModel.moveDirection(dir);
+      boolean wumpusWarning = false;
+      boolean pitWarning = false;
+      if (moveModel.isWumpusClose()) {
+
+        wumpusWarning = true;
+
+      }
+
+      if (moveModel.isPitClose()) {
+
+        pitWarning = true;
+
+      }
+
+      view.updatePlayerPosition(moveModel.getCurrentPosition(), wumpusWarning, pitWarning,k);
+      view.makeVisible(moveModel.getListOfTunnels(prev, dir));
+      view.resetFocus();
+    }
+
+    if (moveModel.isCaughtByBat(moveModel.getCurPosition()) == 1) {
+      System.out.println("1");
+      boolean wumpusWarning = false;
+      boolean pitWarning = false;
+      if (moveModel.isWumpusClose()) {
+
+        wumpusWarning = true;
+
+      }
+
+      if (moveModel.isPitClose()) {
+
+        pitWarning = true;
+
+      }
+      view.updatePlayerPosition(moveModel.getCurrentPosition(), wumpusWarning, pitWarning,k);
+      view.resetFocus();
+    }
+    if (moveModel.isEaten() || moveModel.hasFallen()) {
+      MessageView v = new MessageView("You Lost!!!");
+    }
+  }
+
+  public void generateGrid(htwView3 view) {
+    this.view = view;
+    model.setStartPosition(model.getRooms().get(0));
+    view.createGrid(model.getRows(), model.getColumns(), model.getRoomNumbers(),
+        model.getCardinalNumber());
+
+  }
+
+  public void getAdjacentRooms(int pos, int newPos) {
+
+    List<Integer> rooms = model.getAdjacentRooms(pos);
+
+    if (rooms.contains(newPos)) {
+
+      int index = rooms.indexOf(newPos);
+      List<String> directions = model.getCardinalDirections();
+      String direction = directions.get(index);
+
+      movePlayer(direction);
+    }
+
+  }
+
+  public List<Integer> getPitPositions() {
+    return model.getPitsPosition();
+  }
+
+  public List<Integer> getBatPositions() {
+    return model.getBatsPosition();
+  }
+
+  public int getWumpusPosition() {
+    return model.getWumpusPosition();
+  }
+
+  public void shootArrow(int i, int j) {
+
+    System.out.println(i + " " + j);
+    System.out.println("Shot" + model.shoot(model.getCave(i), j));
+
+  }
+
+}

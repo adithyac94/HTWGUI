@@ -1,0 +1,155 @@
+package htwmodel;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * This interface represents a player. It contains operations to move a player,
+ * shoot an arrow, returns the rooms in the maze and check if a player has been
+ * eaten or fallen in to a pit.
+ */
+public interface Player {
+
+  /**
+   * This method sets the start position of the player.
+   *
+   * @param startPosition
+   * 
+   */
+  void setStartPosition(String startPosition);
+
+  /**
+   * This method checks if the pit is close to the player.
+   *
+   * @return boolean
+   * 
+   */
+  boolean isPitClose();
+
+  /**
+   * This method checks if the Wumpus is close to the player.
+   *
+   * @return boolean
+   * 
+   */
+  boolean isWumpusClose();
+
+  /**
+   * This method moves a player to the specified position.
+   *
+   * @param position
+   * 
+   */
+  void move(String position);
+
+  /**
+   * This method checks if the player has been eaten by the Wumpus.
+   *
+   * @return boolean
+   * 
+   */
+  boolean isEaten();
+
+  /**
+   * This method checks if the player has fallen in to the pit.
+   *
+   * @return boolean
+   * 
+   */
+  boolean hasFallen();
+
+  /**
+   * This method gets all the possible paths the player can move to from the
+   * current positions.
+   *
+   * @return List of String
+   * 
+   */
+  List<String> getTunnelLeads();
+
+  /**
+   * This method gets the start position of the player.
+   *
+   * @return String
+   * 
+   */
+  Integer getStartPosition();
+
+  /**
+   * This method gets the list of all the rooms in the maze.
+   *
+   * @return List of String
+   * 
+   */
+  List<String> getRooms();
+
+  /**
+   * This method gets the current of the player.
+   *
+   * @return String
+   * 
+   */
+  Integer getCurrentPosition();
+
+  /**
+   * This method checks if the player is caught by the bat.
+   *
+   * @param position the Position of the player
+   * 
+   * @return integer
+   * 
+   */
+  int isCaughtByBat(String position);
+
+  /**
+   * This method enables the player to shoot an arrow given the direction and the
+   * number of caves.
+   *
+   * @param position the position of the player
+   * @param caves    the number of caves
+   * 
+   * @return integer
+   * 
+   */
+  int shoot(String position, int caves);
+
+  /**
+   * This method gets the list of all the rooms in the Grid.
+   *
+   * 
+   * @return integer list
+   * 
+   */
+  List<Integer> getRoomNumbers();
+
+  int getRows();
+
+  int getColumns();
+
+  List<String> getCardinalDirections();
+
+  void moveDirection(String dir);
+
+  List<String> getDirections(int pos);
+
+  List<Integer> getListOfTunnels(int prevPosition, String Direction);
+
+  List<Integer> getAdjacentRooms(int pos);
+
+  Map<Integer, List> getCardinalNumber();
+
+  int getWumpusPosition();
+
+  List<Integer> getPitsPosition();
+
+  List<Integer> getBatsPosition();
+
+  String getCurPosition();
+
+  String getCave(String caveDirection);
+
+  Maze getMaze();
+
+  int getArrowNumber();
+
+}

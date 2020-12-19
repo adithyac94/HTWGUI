@@ -1,0 +1,46 @@
+package htwview;
+
+
+import java.awt.BorderLayout;
+import java.awt.Font;
+
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+
+public class MessageView extends JFrame{
+  JLabel rules;
+  JPanel panel;
+    public MessageView(){
+      panel = new JPanel();
+      panel.setLayout(new BorderLayout());
+        rules = new JLabel("<html><p>RULES</p>\r\n" + 
+            "<p>1) Press S to Shoot an Arrow.</p>\r\n" + 
+            "<p>2) Use Arrow Keys to Move the Player using the Keyboard.</p>\r\n" + 
+            "<p>3) Click on a valid room to move the player using the mouse.</p>\r\n" + 
+            "<p>4) Click on the restart button to restart the game with the same maze.</p>\r\n" + 
+            "<p>5) If two players enter the same maze, then of the players will hide until the player moves again.</p><html>");
+        
+        rules.setFont(new Font("Serif", Font.BOLD, 20));
+        panel.add(rules);
+        
+        JButton ok = new JButton("OK");
+        
+        panel.add(ok,BorderLayout.SOUTH);
+        this.setResizable(false);
+        this.add(panel);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.pack();
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
+        
+    }
+
+    
+    public static void main(String[] args) {
+        new MessageView();
+    }
+}

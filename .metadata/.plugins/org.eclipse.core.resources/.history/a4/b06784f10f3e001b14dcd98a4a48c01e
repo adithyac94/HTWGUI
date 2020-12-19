@@ -1,0 +1,179 @@
+package htwview;
+
+import java.awt.Container;
+import java.awt.Font;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+
+/**
+ * This method represents the Setting view of the game. It consist of methods to
+ * set the Maze configuration info provided by the user. It implements the
+ * ActionListener interface.
+ */
+public class MazeConfigurationView extends JFrame implements ActionListener {
+
+  private static final long serialVersionUID = 1L;
+  private JTextField trows;
+  private JTextField tcols;
+
+  private JTextField twalls;
+
+  private JTextField tbats;
+
+  private JTextField tpits;
+
+  private JTextField tarrows;
+
+  private IntroView iView;
+
+  /**
+   * Constructor to create a MazeConfigurationView given the Intro View.
+   * 
+   * @param iView Intro View Object
+   */
+  public MazeConfigurationView(IntroView iView) {
+    this.iView = iView;
+  }
+
+  /**
+   * This method opens a frame that consist of textfields for the user to enter
+   * the Maze settings.
+   * 
+   */
+  public void openDialogBox() {
+
+    Container c;
+    JLabel title;
+    JLabel rows;
+    JLabel cols;
+    JLabel walls;
+    JLabel bats;
+    JButton ok;
+    JLabel pits;
+    JLabel arrows;
+
+    setTitle("Maze Configuration");
+    setBounds(300, 90, 600, 600);
+    setResizable(false);
+    c = getContentPane();
+    c.setLayout(null);
+
+    ImageIcon grassIcon2 = new ImageIcon("res/images/settings.png");
+    Image img2 = grassIcon2.getImage();
+    Image newImg2 = img2.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH);
+    ImageIcon newIcon2 = new ImageIcon(newImg2);
+
+    title = new JLabel("Maze Settings", newIcon2, JLabel.LEFT);
+    title.setFont(new Font("Serif", Font.PLAIN, 30));
+    title.setSize(300, 40);
+    title.setLocation(180, 30);
+    c.add(title);
+
+    rows = new JLabel("Number of Rows (Max 10): ");
+    rows.setFont(new Font("Serif", Font.ITALIC, 22));
+    rows.setSize(270, 20);
+    rows.setLocation(100, 100);
+    c.add(rows);
+
+    trows = new JTextField();
+    trows.setFont(new Font("Arial", Font.PLAIN, 15));
+    trows.setSize(70, 20);
+    trows.setLocation(390, 100);
+    c.add(trows);
+
+    cols = new JLabel("Number of Columns (Max 10): ");
+    cols.setFont(new Font("Serif", Font.ITALIC, 22));
+    cols.setSize(270, 20);
+    cols.setLocation(100, 150);
+    c.add(cols);
+
+    tcols = new JTextField();
+    tcols.setFont(new Font("Arial", Font.PLAIN, 15));
+    tcols.setSize(70, 20);
+    tcols.setLocation(390, 150);
+    c.add(tcols);
+
+    walls = new JLabel("Number of Remaining Walls: ");
+    walls.setFont(new Font("Serif", Font.ITALIC, 22));
+    walls.setSize(270, 20);
+    walls.setLocation(100, 200);
+    c.add(walls);
+
+    twalls = new JTextField();
+    twalls.setFont(new Font("Arial", Font.PLAIN, 15));
+    twalls.setSize(70, 20);
+    twalls.setLocation(390, 200);
+    c.add(twalls);
+
+    bats = new JLabel("Number of Bats: ");
+    bats.setFont(new Font("Serif", Font.ITALIC, 22));
+    bats.setSize(270, 20);
+    bats.setLocation(100, 250);
+    c.add(bats);
+
+    tbats = new JTextField();
+    tbats.setFont(new Font("Arial", Font.PLAIN, 15));
+    tbats.setSize(70, 20);
+    tbats.setLocation(390, 250);
+    c.add(tbats);
+
+    pits = new JLabel("Number of Pits: ");
+    pits.setFont(new Font("Serif", Font.ITALIC, 22));
+    pits.setSize(270, 20);
+    pits.setLocation(100, 300);
+    c.add(pits);
+
+    tpits = new JTextField();
+    tpits.setFont(new Font("Arial", Font.PLAIN, 15));
+    tpits.setSize(70, 20);
+    tpits.setLocation(390, 300);
+    c.add(tpits);
+
+    arrows = new JLabel("Number of Arrows: ");
+    arrows.setFont(new Font("Serif", Font.ITALIC, 22));
+    arrows.setSize(270, 20);
+    arrows.setLocation(100, 350);
+    c.add(arrows);
+
+    tarrows = new JTextField();
+    tarrows.setFont(new Font("Arial", Font.PLAIN, 15));
+    tarrows.setSize(70, 20);
+    tarrows.setLocation(390, 350);
+    c.add(tarrows);
+
+    ok = new JButton("OK");
+    ok.setFont(new Font("Arial", Font.BOLD, 22));
+    ok.setSize(100, 20);
+    ok.setLocation(250, 450);
+    ok.addActionListener(this);
+    c.add(ok);
+
+    setVisible(true);
+
+  }
+
+  /**
+   * This method sets the Maze information inputs entered by the user and closes
+   * the frame.
+   * 
+   * @param e ActionEvent
+   */
+  public void actionPerformed(ActionEvent e) {
+
+    iView.setRows(!trows.getText().isEmpty() ? Integer.parseInt(trows.getText()) : 9);
+    iView.setColumns(!tcols.getText().isEmpty() ? Integer.parseInt(tcols.getText()) : 9);
+    iView.setWalls(!twalls.getText().isEmpty() ? Integer.parseInt(twalls.getText()) : 0);
+    iView.setBats(!tbats.getText().isEmpty() ? Integer.parseInt(tbats.getText()) : 2);
+    iView.setPits(!tpits.getText().isEmpty() ? Integer.parseInt(tpits.getText()) : 2);
+    iView.setArrows(!tarrows.getText().isEmpty() ? Integer.parseInt(tarrows.getText()) : 2);
+    this.dispose();
+  }
+
+}
