@@ -106,3 +106,10 @@ GUI-Example Runs
 
 ![image](https://user-images.githubusercontent.com/9563777/102681156-27718780-41e5-11eb-8447-97ded8a2acbf.png)
 
+	Assumptions
+
+1) If a bat and a Wumpus are in the same location, then the bat picks up the player 50% of the time before the Wumpus can eat it.
+
+2) If no inputs are given by the user then the program sets default values.
+
+3) The number of bats or pits cannot be greater than the number of rooms.
