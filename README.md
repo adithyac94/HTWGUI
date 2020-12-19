@@ -92,19 +92,17 @@ GUI-Example Runs
 
 1) The example 1 run shows the player losing by falling into a pit.
 
-file:///C:/Users/Adithya/HTWGUI/HTWGUI/res/GUIExampleRuns/ExampleRun1.png
+![image](https://user-images.githubusercontent.com/9563777/102681094-b7630180-41e4-11eb-9fcf-fb9893c2cbc0.png)
 
-2) The example 2 run shows the player being eaten by a Wumpus. It also displays the scrollpane on 	the panel.
+2) The example 2 run shows the player being eaten by a Wumpus. It also displays the scrollpane on the panel.
+
+![image](https://user-images.githubusercontent.com/9563777/102681139-027d1480-41e5-11eb-8aec-6c7db02debe8.png)
 
 3) The example 3 run shows the player killing the Wumpus.
 
+![image](https://user-images.githubusercontent.com/9563777/102681146-17f23e80-41e5-11eb-8798-fe4f47cecbeb.png)
+
 4) The example 4 run shows the grid in two player-mode.
 
+![image](https://user-images.githubusercontent.com/9563777/102681156-27718780-41e5-11eb-8447-97ded8a2acbf.png)
 
-	Assumptions
-
-1) If a bat and a Wumpus are in the same location, then the bat picks up the player 50% of the time before the Wumpus can eat it.
-
-2) If no inputs are given by the user then the program sets default values.
-
-3) The number of bats or pits cannot be greater than the number of rooms.
